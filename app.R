@@ -21,8 +21,9 @@ library(DSPGGrocery)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
-  
-  # Design 
+  skin = "green",
+
+  # Design
   dashboardHeader(title = "DSPG Grocery Stores"),
   dashboardSidebar(
     sidebarMenu(
@@ -32,91 +33,92 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
-    
     tabItems(
-      
+
       # First Tab
       tabItem(
         tabName = "map_dashboard",
-        
         fluidRow(
-
           box(
             # Box container containing UI for map inputs
             width = 4,
             title = "Find Stores",
-            solidHeader = TRUE, 
+            solidHeader = TRUE,
             collapsible = TRUE,
             collapsed = TRUE,
-            
-              
-            textInput(inputId = "address", 
-                      label = "Enter Store Address", 
-                      placeholder = "23 Main St, Lake View, IA, United States, Iowa",
-                      value = "23 Main St, Lake View, IA, United States, Iowa"),
-              
-            textInput(inputId = "keyword", 
-                      label = "Enter Type of Store", 
-                      placeholder = "Grocery, Dollar, Chain",
-                      value = "Grocery"),
-            
-            actionButton(inputId = "calc_data_button", 
-                         label = "Calculate Location",
-                         icon = icon("location-dot")),
-            
-            actionButton(inputId = "map_data_button",
-                         label = "Map Retrieved Data",
-                         icon = icon("location"))
+            textInput(
+              inputId = "address",
+              label = "Enter Store Address",
+              placeholder = "23 Main St, Lake View, IA, United States, Iowa",
+              value = "23 Main St, Lake View, IA, United States, Iowa"
             ),
-
-          
-          box(width = 12, 
-              
-              leafletOutput("leaflet_map", height = 750))
-          
+            textInput(
+              inputId = "keyword",
+              label = "Enter Type of Store",
+              placeholder = "Grocery, Dollar, Chain",
+              value = "Grocery"
+            ),
+            actionButton(
+              inputId = "calc_data_button",
+              label = "Calculate Location",
+              icon = icon("location-dot")
+            ),
+            actionButton(
+              inputId = "map_data_button",
+              label = "Map Retrieved Data",
+              icon = icon("location")
+            )
+          ),
+          box(
+            width = 12,
+            leafletOutput("leaflet_map", height = 750)
+          )
         )
-      ), 
-      
+      ),
+
       # Second Tab
       tabItem(
         tabName = "user_dashboard",
-        
         fluidRow(
           box(
             # Box container containing UI for user inputs
             width = 4,
-            title = "Calculating Revenue", 
-            solidHeader = TRUE, 
-            
+            title = "Calculating Revenue",
+            solidHeader = TRUE,
             numericInput(
-              inputId = "month_rent", 
-              label = "Monthly Rent", 
-              value = 2500, 
-              step = 100, 
-              min = 0),
-            
+              inputId = "month_rent",
+              label = "Monthly Rent",
+              value = 2500,
+              step = 100,
+              min = 0
+            ),
             numericInput(
-              inputId = "loan_amt", 
+              inputId = "loan_amt",
               label = "Loan Amount",
               value = 100000,
               step = 100,
-              min = 0),
-            
-            sliderInput(inputId = "int_rate", 
-                        label = "Interest Rate", 
-                        min = 0, 
-                        max = 15, 
-                        value = 5, 
-                        step = 0.05),
-            
-            radioButtons(inputId = "scenario_button", 
-                         label = "Select Scenario:", 
-                         choices = c("Scenario One" = "scenario_one",
-                                     "Scenario Two" = "scenario_two",
-                                     "No Scenario" = "no_scenario"), 
-                         selected = 1),
-            
-            # Value Index section 
+              min = 0
+            ),
+            sliderInput(
+              inputId = "int_rate",
+              label = "Interest Rate",
+              min = 0,
+              max = 15,
+              value = 5,
+              step = 0.05
+            ),
+            radioButtons(
+              inputId = "scenario_button",
+              label = "Select Scenario:",
+              choices = c(
+                "Scenario One" = "scenario_one",
+                "Scenario Two" = "scenario_two",
+                "No Scenario" = "no_scenario"
+              ),
+              selected = 1
+            ),
+
+            # Value Index section
             HTML("<h3> Value Index </h3>
                  
                  <p> The following are a list of inputs for the two possible scenarios 
@@ -144,7 +146,6 @@ ui <- dashboardPage(
                  <li>Miscellaneous Assets - an optional asset to evaluate</li>
                  <li>Miscellaneous Asset Life - use life of asset in years</li>
                  </ul>"),
-            
             HTML("<h4> Scenario One - Building / Remodeling </h4>
                  
                  <p> In scenario One, the user is either building the grocery 
@@ -157,10 +158,9 @@ ui <- dashboardPage(
                  <ul> 
                  <li>Building Remodel Costs - cost of remodeling purchased grocery store</li>
                  </ul>"),
-            
-            HTML("<h4> Scenario Two - Renting </h4>",
-                 
-                 "<p> In scenario Two, the user is renting the grocery store. 
+            HTML(
+              "<h4> Scenario Two - Renting </h4>",
+              "<p> In scenario Two, the user is renting the grocery store. 
                  Once 'Scenario Two' is selected in the 'Select Scenario' menu, 
                  a set of additional cost inputs will open to the right</p>
                  
@@ -168,28 +168,31 @@ ui <- dashboardPage(
                  
                  <ul> 
                  <li>Leasehold Improvements - cost of improving rented grocery store</li>
-                 </ul>")
-          
-            ),
-          
+                 </ul>"
+            )
+          ),
           box(
             width = 4,
-            title = "Scenario Estimations", 
+            title = "Scenario Estimations",
             solidHeader = TRUE,
             collapsible = TRUE,
-            
             uiOutput(outputId = "scenario_ui")
-            
           ),
-          
           box(
-            width = 4, 
+            width = 4,
             title = "Pre-Tax Profit",
-            
-            
             valueBoxOutput("pretax_vbox", width = 12)
-            
           )
+        )
+      ),
+
+      # Third Tab
+      tabItem(
+        tabName = "plot_dashboard",
+        fluidPage(
+          box(title = "Plot One", width = 6, background = "blue"),
+          box(title = "Plot Three", width = 6, background = "yellow"),
+          box(title = "Plot Two", width = 12, background = "green")
         )
       )
     )
@@ -266,10 +269,15 @@ server <- function(input, output) {
     output$pretax_vbox <- renderValueBox({
       valueBox(input$remodel, 
                subtitle = "Total Estimated Pre-Tax Profit", 
-               color = 'green') 
+               color = 'green',
+               icon = icon("dollar-sign")) 
     })
 
-
+  
+  #### THIRD PAGE
+    
+    
+    
 }
 
 # Run the application 
