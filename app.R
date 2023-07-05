@@ -39,39 +39,56 @@ ui <- dashboardPage(
       tabItem(
         tabName = "map_dashboard",
         fluidRow(
-          box(
-            # Box container containing UI for map inputs
-            width = 4,
-            title = "Find Stores",
-            solidHeader = TRUE,
-            collapsible = TRUE,
-            collapsed = TRUE,
-            textInput(
-              inputId = "address",
-              label = "Enter Store Address",
-              placeholder = "23 Main St, Lake View, IA, United States, Iowa",
-              value = "23 Main St, Lake View, IA, United States, Iowa"
-            ),
-            textInput(
-              inputId = "keyword",
-              label = "Enter Type of Store",
-              placeholder = "Grocery, Dollar, Chain",
-              value = "Grocery"
-            ),
-            actionButton(
-              inputId = "calc_data_button",
-              label = "Calculate Location",
-              icon = icon("location-dot")
-            ),
-            actionButton(
-              inputId = "map_data_button",
-              label = "Map Retrieved Data",
-              icon = icon("location")
-            )
-          ),
+          
           box(
             width = 12,
-            leafletOutput("leaflet_map", height = 750)
+            collapsible = TRUE,
+            title = "Store Locator",
+            
+            # UI for map inputs
+            box(
+              width = 6,
+              title = "Find Stores",
+              solidHeader = TRUE,
+
+              textInput(
+                inputId = "address",
+                label = "Enter Store Address",
+                placeholder = "23 Main St, Lake View, IA, United States, Iowa",
+                value = "23 Main St, Lake View, IA, United States, Iowa"
+              ),
+              textInput(
+                inputId = "keyword",
+                label = "Enter Type of Store",
+                placeholder = "Grocery, Dollar, Chain",
+                value = "Grocery"
+              ),
+              actionButton(
+                inputId = "calc_data_button",
+                label = "Calculate Location",
+                icon = icon("location-dot")
+              ),
+              actionButton(
+                inputId = "map_data_button",
+                label = "Map Retrieved Data",
+                icon = icon("location")
+              )
+            ),
+            
+            # UI for Map Information
+            box(
+              width = 6,
+              title = "Map Data",
+              solidHeader = TRUE,
+              
+              uiOutput("map_information_ui")
+              
+            )
+          ),
+          
+          box(
+            width = 12,
+            leafletOutput("leaflet_map", height = 700)
           )
         )
       ),
@@ -176,6 +193,8 @@ ui <- dashboardPage(
             title = "Scenario Estimations",
             solidHeader = TRUE,
             collapsible = TRUE,
+            
+            #uiOutput for scenario-based inputs
             uiOutput(outputId = "scenario_ui")
           ),
           box(
@@ -205,6 +224,7 @@ server <- function(input, output) {
   #### FIRST PAGE
 
   source(file = "../Grocery/Harun/testR/Grocery_Store_Map.R")
+  source(file = "../Grocery/Alex/Address_Parser.R")
 
   
   # Render the base leaflet map using the following settings
@@ -219,6 +239,25 @@ server <- function(input, output) {
   
     StoreInfo <- Grocery_Store_Map(address = input$address, keyword = input$keyword)
     })
+  
+  # TRIGGER THIS WITH AN OBSERVE EVENT FOR MAP CALCULATE
+  output$map_information_ui <- renderUI({
+    tagList(
+      
+      HTML("Cities in area: "),
+      renderText(grocery_cities_inter$NAME.x, sep = ", "),
+      
+      p(),
+      
+      HTML("Counties in area: "),
+      renderText(grocery_counties_inter$NAME, sep = ", "),
+      
+      p(),
+      
+      HTML("States in area: "),
+      renderText(unique(grocery_counties_inter$STATEFP), sep = ", ")
+    )
+  })
 
   observeEvent(input$map_data_button, {
     # Load the named list into the global environment
