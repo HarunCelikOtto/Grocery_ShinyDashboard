@@ -27,7 +27,8 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem("Store Map", tabName = "map_dashboard", icon = icon("map-location-dot")),
-      menuItem("User Inputs", tabName = "user_dashboard", icon = icon("th"))
+      menuItem("User Inputs", tabName = "user_dashboard", icon = icon("calculator")),
+      menuItem("Dashboards", tabName = "plot_dashboard", icon = icon("chart-area"))
     )
   ),
   dashboardBody(
