@@ -240,24 +240,37 @@ server <- function(input, output) {
     StoreInfo <- Grocery_Store_Map(address = input$address, keyword = input$keyword)
     })
   
-  # TRIGGER THIS WITH AN OBSERVE EVENT FOR MAP CALCULATE
-  output$map_information_ui <- renderUI({
-    tagList(
-      
-      HTML("Cities in area: "),
-      renderText(grocery_cities_inter$NAME.x, sep = ", "),
-      
-      p(),
-      
-      HTML("Counties in area: "),
-      renderText(grocery_counties_inter$NAME, sep = ", "),
-      
-      p(),
-      
-      HTML("States in area: "),
-      renderText(unique(grocery_counties_inter$STATEFP), sep = ", ")
-    )
+  
+  # REACTIVE TEST
+  mapDataReactive <- reactive({
+    
+    if (exists("grocery_cities_inter")) {
+      tagList(
+        
+        HTML("Cities in area: "),
+        renderText(grocery_cities_inter$NAME.x, sep = ", "),
+        
+        p(),
+        
+        HTML("Counties in area: "),
+        renderText(grocery_counties_inter$NAME, sep = ", "),
+        
+        p(),
+        
+        HTML("States in area: "),
+        renderText(unique(grocery_counties_inter$STATEFP), sep = ", ")
+      )
+    }
   })
+  
+  # TRIGGER THIS WITH AN OBSERVE EVENT FOR MAP CALCULATE
+  observeEvent(input$map_data_button, {
+    output$map_information_ui <- renderUI({
+      mapDataReactive()
+    })
+  })
+  
+  
 
   observeEvent(input$map_data_button, {
     # Load the named list into the global environment
