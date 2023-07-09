@@ -54,8 +54,8 @@ ui <- dashboardPage(
               textInput(
                 inputId = "address",
                 label = "Enter Store Address",
-                placeholder = "23 Main St, Lake View, IA, United States, Iowa",
-                value = "23 Main St, Lake View, IA, United States, Iowa"
+                placeholder = "St, Lamoni, IA",
+                value = "St, Lamoni, IA"
               ),
               textInput(
                 inputId = "keyword",
@@ -201,6 +201,11 @@ ui <- dashboardPage(
             width = 4,
             title = "Pre-Tax Profit",
             valueBoxOutput("pretax_vbox", width = 12)
+          ),
+          box(
+            width = 4,
+            title = "Gross Margin Profit",
+            valueBoxOutput("gross_margin", width = 12)
           )
         )
       ),
@@ -221,12 +226,9 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  #### FIRST PAGE
-
-  source(file = "../Grocery/Harun/testR/Grocery_Store_Map.R")
-  source(file = "../Grocery/Alex/Address_Parser.R")
-
+  StoreInfo <- NULL
   
+  #### FIRST PAGE
   # Render the base leaflet map using the following settings
   output$leaflet_map <- renderLeaflet({
     leaflet() %>%
@@ -237,7 +239,9 @@ server <- function(input, output) {
   # Trigger this after hitting the calculate location Button
   observeEvent(input$calc_data_button, {
   
-    StoreInfo <- Grocery_Store_Map(address = input$address, keyword = input$keyword)
+    StoreInfo <<- Create_Circle_Buffer(address = input$address,
+                                      keyword = input$keyword,
+                                      api_key = Sys.getenv("PLACES_KEY"))
     })
   
   
@@ -248,7 +252,7 @@ server <- function(input, output) {
       tagList(
         
         HTML("Cities in area: "),
-        renderText(grocery_cities_inter$NAME.x, sep = ", "),
+        renderText(grocery_cities_inter$NAME, sep = ", "),
         
         p(),
         
@@ -280,21 +284,22 @@ server <- function(input, output) {
       print("StoreInfo doesn't exist.")
     }
   
-    leafletProxy("leaflet_map") %>%
+    suppressWarnings(leafletProxy("leaflet_map") %>%
       clearMarkers() %>%
       clearShapes() %>%
-      addPolygons(data = grocery_counties_inter,
+      addPolygons(data = all_counties$geometry, 
                   fillOpacity = 0.05, 
                   fillColor = 'darkred', 
                   color = 'black',
                   opacity = .5) %>%
-      addPolygons(data = grocery_cities_inter,
-                  fillColor = "blue",
-                  popup = grocery_cities_inter$NAME.x) %>%
-      addCircleMarkers(lng = df_grocery$lng, 
-                       lat = df_grocery$lat, 
-                       popup = df_grocery$name, 
-                       color = "green", radius = 10)
+      addPolygons(data = buffer_circle$geometry, fillColor = 'gray', color = 'red') %>%
+      addPolygons(data = grocery_cities_inter$geometry, fillColor = 'blue') %>%
+      addCircleMarkers(lng = df_grocery_all$lng, 
+                       lat = df_grocery_all$lat, 
+                       color= 'green', 
+                       popup = df_grocery_all$name, 
+                       radius = 10))
+    
   })
   
   #### SECOND PAGE
@@ -322,6 +327,18 @@ server <- function(input, output) {
       valueBox(input$remodel, 
                subtitle = "Total Estimated Pre-Tax Profit", 
                color = 'green',
+               icon = icon("dollar-sign")) 
+    })
+    
+    test_total_rev <- 120000
+    
+    output$gross_margin <- renderValueBox({
+      valueBox(Gross_Margin(Total_Estimated_Revenue = test_total_rev, 
+                            Percentage = input$int_rate), 
+               subtitle = sprintf("Estimated Gross Margin Profit 
+                                  (based on %s as total estimated revenue)", 
+                                  test_total_rev), 
+               color = 'blue',
                icon = icon("dollar-sign")) 
     })
 
