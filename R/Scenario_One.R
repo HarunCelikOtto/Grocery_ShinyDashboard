@@ -38,25 +38,25 @@ tagList(
   
   numericInput(inputId = "misc_one", 
                label = "Miscellaneous Asset One", 
-               value = 0, step = 100),
+               value = NA, step = 100),
   
   numericInput(inputId = "misc_one_life", 
                label = "Miscellaneous Asset One Life Use (years)", 
-               value = 0, step = 100),
+               value = NA, step = 100),
   
   numericInput(inputId = "misc_two", 
                label = "Miscellaneous Asset Two", 
-               value = 0, step = 100),
+               value = NA, step = 100),
   
   numericInput(inputId = "misc_two_life", 
                label = "Miscellaneous Asset Two Life Use (years)", 
-               value = 0, step = 100),
+               value = NA, step = 100),
   
   numericInput(inputId = "misc_three", 
                label = "Miscellaneous Asset Three", 
-               value = 0, step = 100),
+               value = NA, step = 100),
   
   numericInput(inputId = "misc_three_life", 
                label = "Miscellaneous Asset Three Life Use (years)", 
-               value = 0, step = 100)
+               value = NA, step = 100)
 )
