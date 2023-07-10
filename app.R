@@ -205,7 +205,12 @@ ui <- dashboardPage(
           box(
             width = 4,
             title = "Gross Margin Profit",
-            valueBoxOutput("gross_margin", width = 12)
+            valueBoxOutput("gross_margin_vbox", width = 12)
+          ),
+          box(
+            width = 4,
+            title = "Depreciation Costs",
+            valueBoxOutput("depreciation_vbox", width = 12)
           )
         )
       ),
@@ -267,15 +272,52 @@ server <- function(input, output) {
     }
   })
   
-  # TRIGGER THIS WITH AN OBSERVE EVENT FOR MAP CALCULATE
+  # Map Calculate Button Generates list of cities, counties and states
   observeEvent(input$map_data_button, {
     output$map_information_ui <- renderUI({
       mapDataReactive()
     })
   })
   
+  DepreciationReactive <- observeEvent(input$scenario_button, {
+    
+    if (input$scenario_button == "scenario_one") {
+     Depreciation_1(Building_Remodeling = input$remodel,
+                    Parking_Lot_Improvements = input$parklot,
+                    Shelving_Check_Out_Counters = input$shelves, 
+                    Computer_Equipment_POS = input$computers,
+                    Vehicles = input$vehicles,
+                    Display_Cases = input$disp_case, 
+                    Refrigeration = input$refrige,
+                    Freezers = input$freezer,
+                    Meat_Cutting_Equipment = input$meat_eqp,
+                    Miscellaneous_Assets_1 = input$misc_one, 
+                    Miscellaneous_Assets_1_Use_Life = input$misc_one_life, 
+                    Miscellaneous_Assets_2 = input$misc_two, 
+                    Miscellaneous_Assets_2_Use_Life = input$misc_two_life, 
+                    Miscellaneous_Assets_3 = input$misc_three, 
+                    Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+    }
+    else if (input$scenario_button == "scenario_one") {
+      Depreciation_2(Building_Remodeling = input$leasehold,
+                     Parking_Lot_Improvements = input$parklot,
+                     Shelving_Check_Out_Counters = input$shelves, 
+                     Computer_Equipment_POS = input$computers,
+                     Vehicles = input$vehicles,
+                     Display_Cases = input$disp_case, 
+                     Refrigeration = input$refrige,
+                     Freezers = input$freezer,
+                     Meat_Cutting_Equipment = input$meat_eqp,
+                     Miscellaneous_Assets_1 = input$misc_one, 
+                     Miscellaneous_Assets_1_Use_Life = input$misc_one_life, 
+                     Miscellaneous_Assets_2 = input$misc_two, 
+                     Miscellaneous_Assets_2_Use_Life = input$misc_two_life, 
+                     Miscellaneous_Assets_3 = input$misc_three, 
+                     Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+      }
+    })
   
-
+  
   observeEvent(input$map_data_button, {
     # Load the named list into the global environment
     if (exists("StoreInfo")) {
@@ -321,6 +363,9 @@ server <- function(input, output) {
       
     })
     
+    # Change Depreciation value based on scenario
+    
+    
     
     # Output Value box(es)
     output$pretax_vbox <- renderValueBox({
@@ -332,14 +377,22 @@ server <- function(input, output) {
     
     test_total_rev <- 120000
     
-    output$gross_margin <- renderValueBox({
+    output$gross_margin_vbox <- renderValueBox({
       valueBox(Gross_Margin(Total_Estimated_Revenue = test_total_rev, 
-                            Percentage = input$int_rate), 
+                            Percentage = input$int_rate / 100), 
                subtitle = sprintf("Estimated Gross Margin Profit 
                                   (based on %s as total estimated revenue)", 
                                   test_total_rev), 
                color = 'blue',
                icon = icon("dollar-sign")) 
+    })
+    
+    # Should change based on which depreciation calculation is running
+    output$depreciation_vbox <- renderValueBox({
+      valueBox(DepreciationReactive(),
+               subtitle = "Depreciation Costs",
+               color = 'red',
+               icon = icon("circle-dollar-to-slot"))
     })
 
   
