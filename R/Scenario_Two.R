@@ -3,9 +3,8 @@ tagList(
                label = "Leasehold Improvements", 
                value = 50000, step = 100),
   
-  
-  numericInput(inputId = "parklot", 
-               label = "Parking Lot Improvements", 
+  numericInput(inputId = "leasehold_life", 
+               label = "Leasehold Improvements Use Life", 
                value = 50000, step = 100),
   
   numericInput(inputId = "shelves", 
