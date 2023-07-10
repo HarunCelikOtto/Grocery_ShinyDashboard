@@ -379,11 +379,6 @@ server <- function(input, output) {
       else if (input$scenario_button == "scenario_two") {
         source(file = "R/Scenario_Two.R")
       }
-      
-      else if (input$scenario_button == "no_scenario")  {
-        HTML("<h5> No Scenario is Selected </h5> ")
-      }
-      
     })
     
     # Change Depreciation value based on scenario
