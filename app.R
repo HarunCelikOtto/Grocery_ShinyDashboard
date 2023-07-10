@@ -279,41 +279,49 @@ server <- function(input, output) {
     })
   })
   
+  Depr_1 <- reactive({
+      Depreciation_1(Building_Remodeling = input$remodel,
+                   Parking_Lot_Improvements = input$parklot,
+                   Shelving_Check_Out_Counters = input$shelves,
+                   Computer_Equipment_POS = input$computers,
+                   Vehicles = input$vehicles,
+                   Display_Cases = input$disp_case,
+                   Refrigeration = input$refrige,
+                   Freezers = input$freezer,
+                   Meat_Cutting_Equipment = input$meat_eqp,
+                   Miscellaneous_Assets_1 = input$misc_one,
+                   Miscellaneous_Assets_1_Use_Life = input$misc_one_life,
+                   Miscellaneous_Assets_2 = input$misc_two,
+                   Miscellaneous_Assets_2_Use_Life = input$misc_two_life,
+                   Miscellaneous_Assets_3 = input$misc_three,
+                   Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+  })
+  
+  Depr_2 <- reactive({
+    Depreciation_2(Leasehold_Improvements = input$leasehold, 
+                   Leasehold_Improvements_Use_Life = input$leasehold_life,
+                   Shelving_Check_Out_Counters = input$shelves, 
+                   Computer_Equipment_POS = input$computers,
+                   Vehicles = input$vehicles,
+                   Display_Cases = input$disp_case, 
+                   Refrigeration = input$refrige,
+                   Freezers = input$freezer,
+                   Meat_Cutting_Equipment = input$meat_eqp,
+                   Miscellaneous_Assets_1 = input$misc_one, 
+                   Miscellaneous_Assets_1_Use_Life = input$misc_one_life, 
+                   Miscellaneous_Assets_2 = input$misc_two, 
+                   Miscellaneous_Assets_2_Use_Life = input$misc_two_life, 
+                   Miscellaneous_Assets_3 = input$misc_three, 
+                   Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+  })
+  
   DepreciationReactive <- observeEvent(input$scenario_button, {
     
     if (input$scenario_button == "scenario_one") {
-     Depreciation_1(Building_Remodeling = input$remodel,
-                    Parking_Lot_Improvements = input$parklot,
-                    Shelving_Check_Out_Counters = input$shelves, 
-                    Computer_Equipment_POS = input$computers,
-                    Vehicles = input$vehicles,
-                    Display_Cases = input$disp_case, 
-                    Refrigeration = input$refrige,
-                    Freezers = input$freezer,
-                    Meat_Cutting_Equipment = input$meat_eqp,
-                    Miscellaneous_Assets_1 = input$misc_one, 
-                    Miscellaneous_Assets_1_Use_Life = input$misc_one_life, 
-                    Miscellaneous_Assets_2 = input$misc_two, 
-                    Miscellaneous_Assets_2_Use_Life = input$misc_two_life, 
-                    Miscellaneous_Assets_3 = input$misc_three, 
-                    Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+      output$Depr_1()
     }
-    else if (input$scenario_button == "scenario_one") {
-      Depreciation_2(Building_Remodeling = input$leasehold,
-                     Parking_Lot_Improvements = input$parklot,
-                     Shelving_Check_Out_Counters = input$shelves, 
-                     Computer_Equipment_POS = input$computers,
-                     Vehicles = input$vehicles,
-                     Display_Cases = input$disp_case, 
-                     Refrigeration = input$refrige,
-                     Freezers = input$freezer,
-                     Meat_Cutting_Equipment = input$meat_eqp,
-                     Miscellaneous_Assets_1 = input$misc_one, 
-                     Miscellaneous_Assets_1_Use_Life = input$misc_one_life, 
-                     Miscellaneous_Assets_2 = input$misc_two, 
-                     Miscellaneous_Assets_2_Use_Life = input$misc_two_life, 
-                     Miscellaneous_Assets_3 = input$misc_three, 
-                     Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
+    else if (input$scenario_button == "scenario_two") {
+      print("Scenario Two")
       }
     })
   
@@ -389,7 +397,7 @@ server <- function(input, output) {
     
     # Should change based on which depreciation calculation is running
     output$depreciation_vbox <- renderValueBox({
-      valueBox(DepreciationReactive(),
+      valueBox(output$DepreciationReactive(),
                subtitle = "Depreciation Costs",
                color = 'red',
                icon = icon("circle-dollar-to-slot"))
