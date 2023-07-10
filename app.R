@@ -44,6 +44,7 @@ ui <- dashboardPage(
             width = 12,
             collapsible = TRUE,
             title = "Store Locator",
+            status = "success",
             
             # UI for map inputs
             box(
@@ -102,6 +103,9 @@ ui <- dashboardPage(
             width = 4,
             title = "Calculating Revenue",
             solidHeader = TRUE,
+            status = "primary",
+            
+            
             numericInput(
               inputId = "month_rent",
               label = "Monthly Rent",
@@ -116,25 +120,81 @@ ui <- dashboardPage(
               step = 100,
               min = 0
             ),
-            sliderInput(
-              inputId = "int_rate",
-              label = "Interest Rate",
-              min = 0,
-              max = 15,
-              value = 5,
-              step = 0.05
-            ),
             radioButtons(
               inputId = "scenario_button",
               label = "Select Scenario:",
               choices = c(
                 "Scenario One" = "scenario_one",
-                "Scenario Two" = "scenario_two",
-                "No Scenario" = "no_scenario"
+                "Scenario Two" = "scenario_two"
               ),
-              selected = 1
+              selected = "scenario_one"
             ),
-
+            box(
+              title = "Percentages", 
+              width = 12, 
+              collapsible = T, 
+              solidHeader = T, 
+              status = "primary", 
+              collapsed = T,
+              
+              sliderInput(
+                inputId = "int_rate",
+                label = "Interest Rate",
+                min = 0,
+                max = 15,
+                value = 5,
+                step = 0.05
+              ),
+              sliderInput(
+                inputId = "gross_margin_pct",
+                label = "Gross Margin Percentage",
+                min = 22,
+                max = 26.5,
+                value = 24,
+                step = 0.05
+              ),
+              sliderInput(
+                inputId = "employee_pct",
+                label = "Employee Wages Percentage",
+                min = 6,
+                max = 12,
+                value = 9,
+                step = 0.05
+              ),
+              sliderInput(
+                inputId = "officer_pct",
+                label = "Employee Wages Percentage",
+                min = 0,
+                max = 5,
+                value = 1,
+                step = 0.05
+              ),
+              sliderInput(
+                inputId = "other_exp_pct",
+                label = "Other Operating Expense Percentage",
+                min = 8,
+                max = 12,
+                value = 11,
+                step = 0.05
+              ),
+              sliderInput(
+                inputId = "other_inc_pct",
+                label = "Other Income Percentage",
+                min = 0,
+                max = 2,
+                value = 0.01,
+                step = 0.001
+              ),
+              sliderInput(
+                inputId = "int_inc_pct",
+                label = "Interest Income Percentage",
+                min = 6,
+                max = 12,
+                value = 9,
+                step = 0.05
+              )
+            ),
+            
             # Value Index section
             HTML("<h3> Value Index </h3>
                  
@@ -192,23 +252,25 @@ ui <- dashboardPage(
             width = 4,
             title = "Scenario Estimations",
             solidHeader = TRUE,
-            collapsible = TRUE,
             
             #uiOutput for scenario-based inputs
             uiOutput(outputId = "scenario_ui")
           ),
           box(
             width = 4,
+            collapsible = T,
             title = "Pre-Tax Profit",
             valueBoxOutput("pretax_vbox", width = 12)
           ),
           box(
             width = 4,
+            collapsible = T,
             title = "Gross Margin Profit",
             valueBoxOutput("gross_margin_vbox", width = 12)
           ),
           box(
             width = 4,
+            collapsible = T,
             title = "Depreciation Costs",
             valueBoxOutput("depreciation_vbox", width = 12)
           )
@@ -325,7 +387,11 @@ server <- function(input, output) {
     })
     
     # Change Depreciation value based on scenario
+    ## Define reactive depreciation values
     Depr_1 <- reactive({
+      
+      req(input$remodel)
+      
       Depreciation_1(Building_Remodeling = input$remodel,
                      Parking_Lot_Improvements = input$parklot,
                      Shelving_Check_Out_Counters = input$shelves,
@@ -344,6 +410,9 @@ server <- function(input, output) {
     })
     
     Depr_2 <- reactive({
+      
+      req(input$leasehold)
+      
       Depreciation_2(Leasehold_Improvements = input$leasehold, 
                      Leasehold_Improvements_Use_Life = input$leasehold_life,
                      Shelving_Check_Out_Counters = input$shelves, 
@@ -361,14 +430,19 @@ server <- function(input, output) {
                      Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
     })
     
-    DepreciationReactive <- observeEvent(input$scenario_button, {
-      browser()
+    ## Define a reactive event to update Depreciation calculation values based on
+    ## selected scenario.
+    DepreciationReactive <- reactive({
+      
+      req(input$shelves)
       
       if (input$scenario_button == "scenario_one") {
         Depr_1()
       }
+      else if (input$scenario_button == "scenario_two") {
+        Depr_2()
+      }
     })
-    
     
     # Output Value box(es)
     output$pretax_vbox <- renderValueBox({
@@ -382,7 +456,7 @@ server <- function(input, output) {
     
     output$gross_margin_vbox <- renderValueBox({
       valueBox(Gross_Margin(Total_Estimated_Revenue = test_total_rev, 
-                            Percentage = input$int_rate / 100), 
+                            Percentage = input$gross_margin_pct/100), 
                subtitle = sprintf("Estimated Gross Margin Profit 
                                   (based on %s as total estimated revenue)", 
                                   test_total_rev), 
