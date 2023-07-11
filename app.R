@@ -12,6 +12,7 @@ library(shinyjs)
 library(shinydashboard)
 library(leaflet)
 
+
 library(googleway)
 library(dplyr)
 library(sf)
@@ -24,6 +25,7 @@ library(scales)
 library(tidyr)
 library(ggokabeito)
 library(forcats)
+
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -334,7 +336,14 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  StoreInfo <- NULL
+  # Loading Datasets
+  df_state_index <<- read.csv("loadData/State_Index_SubSet.csv")
+  df_cpi <<- read.csv("loadData/CPI_Subset.csv")
+  
+  cpi <<- df_cpi$Apr[9] - df_cpi$HALF2[8]
+
+  
+  
   
   #### FIRST PAGE
   # Render the base leaflet map using the following settings
@@ -437,6 +446,19 @@ server <- function(input, output) {
                    incProgress(amount = 10, "Completing Census Requests")
                  })
     
+    # Use the address input to find the state FIPS code for revenue calculations
+    state_abbrev <- Address_Parser(input$address)[3]
+    
+    state_code <<- fips_codes %>% 
+      filter(state == state_abbrev) %>%
+      select(state_code) %>%
+      unique() %>%
+      as.integer()
+    
+    state_index <<- df_state_index %>%
+      filter(GeoFips == state_code) %>%
+      select(X2021) %>%
+      as.double()
   })
   
   #### SECOND PAGE
