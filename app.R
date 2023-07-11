@@ -18,6 +18,11 @@ library(sf)
 library(tidycensus)
 library(tigris)
 library(DSPGGrocery)
+library(ggplot2)
+library(plotly)
+library(scales)
+library(tidyr)
+library(ggokabeito)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -283,7 +288,12 @@ ui <- dashboardPage(
         fluidPage(
           box(title = "Plot One", width = 6, background = "blue"),
           box(title = "Plot Three", width = 6, background = "yellow"),
-          box(title = "Plot Two", width = 12, background = "green")
+          box(
+            title = "Plot Two", 
+            width = 12, 
+            background = "green",
+            
+            plotlyOutput(outputId = "plot_two"))
         )
       )
     )
@@ -314,17 +324,15 @@ server <- function(input, output) {
                    
                    incProgress(amount = 10, message = "Loading Geographies")
                    Sys.sleep(2)
-                   incProgress(amoun = 5, message = "Pulling Store Information .. Please Wait")
+                   incProgress(amoun = 10, message = "Please Wait... Pulling Store Information ")
                    
                    StoreInfo <<- Create_Circle_Buffer(address = input$address,
                                                       keyword = input$keyword,
                                                       api_key = Sys.getenv("PLACES_KEY"))
                    
-                   incProgress(amount = 15, "Process Complete")
+                   incProgress(amount = 10, "Process Complete")
                    }
                  )
-  
-    
     })
   
   
@@ -380,6 +388,23 @@ server <- function(input, output) {
                        color= 'green', 
                        popup = df_grocery_all$name, 
                        radius = 10))
+    
+    withProgress(value = 0, 
+                 max = 40, 
+                 message = "Extracting Demographic Information for Area", {
+                   
+                   req(df_census_call)
+                   
+                   incProgress(amount = 10, "Pulling ACS Information")
+                   
+                   df_acs <<- Get_Census_Vars_ACS(df_locations = df_census_call)
+                   
+                   incProgress(amount = 20, "Pulling Census Information")
+                   
+                   df_decennial <<- Get_Census_Vars_Decennial(df_locations = df_census_call)
+                   
+                   incProgress(amount = 10, "Completing Census Requests")
+                 })
     
   })
   
@@ -485,7 +510,65 @@ server <- function(input, output) {
 
   
   #### THIRD PAGE
+  plot_two <- reactive({
+    req(df_acs)
     
+    ## Filter vars from acs table
+    
+    Employment_status_df <- df_acs %>% filter(variable %in% c("B23025_003", "B23025_004", "B23025_005"))
+    
+    ## Convert to wide format
+    
+    Emploment_status_df_wide <- Employment_status_df %>% pivot_wider(names_from = "variable", values_from = c("estimate", "moe"))
+    
+    ## Rename columns
+    
+    employment_df <- Emploment_status_df_wide %>% rename("Total" = "estimate_B23025_003", 
+                                                         "Employed_in_Civilian_Labor_Force" = "estimate_B23025_004", 
+                                                         "Unemployed_in_Civilian_Labor_Force" = "estimate_B23025_005",
+                                                         "Total_moe" = "moe_B23025_003",
+                                                         "Employed_in_Civilian_Labor_Force_moe" = "moe_B23025_004", 
+                                                         "Unemployed_in_Civilian_Labor_Force_moe" = "moe_B23025_005")
+    
+    ## Calculate percentage and margin of error (mutated into two new columns)
+    
+    employment_df2 <- employment_df %>% 
+      mutate(Employment_rate = 100 * (Employed_in_Civilian_Labor_Force/Total), Employment_rate_moe = 100 * moe_prop(Employed_in_Civilian_Labor_Force, Total, Employed_in_Civilian_Labor_Force_moe, Total_moe))
+    
+    ## For moe bar in plot
+    
+    ymin2 <- employment_df2$Employment_rate - employment_df2$Employment_rate_moe
+    ymax2 <- employment_df2$Employment_rate + employment_df2$Employment_rate_moe
+    
+    ## Make plot object
+    
+    p2 <- employment_df2 %>%
+      ggplot(aes(x = NAME, y = Employment_rate, fill = NAME)) +
+      geom_bar(stat = 'identity', show.legend = FALSE) +
+      geom_errorbar(ymin = ymin2, ymax = ymax2, width = .2) +
+      ggtitle("Employment Rate (2021)") +
+      scale_fill_okabe_ito() +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1, scale = 1)) +
+      xlab(NULL) +
+      ylab(NULL) +
+      coord_flip(ylim = c(80,100))
+    
+    ## Convert to plotly object
+    
+    plot2 <- plotly::ggplotly(p2)
+    
+    plot2 <- plot2 %>% layout(annotations = list(list(x = 0.4, y = -0.1, text = "Source: American Community Survey (5-Year Average, 2021)", showarrow = FALSE, xref = 'paper', yref = 'paper', xanchor = 'right', yanchor = 'auto', font = list(size = 10, color = "grey50"))))
+    
+    ## Show Plot
+    
+    plot2
+    
+  })
+    
+    
+  output$plot_two <- renderPlotly({
+    plot_two()
+  })  
     
     
 }
