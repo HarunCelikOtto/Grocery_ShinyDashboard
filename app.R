@@ -23,6 +23,7 @@ library(plotly)
 library(scales)
 library(tidyr)
 library(ggokabeito)
+library(forcats)
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
@@ -34,7 +35,9 @@ ui <- dashboardPage(
     sidebarMenu(
       menuItem("Store Map", tabName = "map_dashboard", icon = icon("map-location-dot")),
       menuItem("User Inputs", tabName = "user_dashboard", icon = icon("calculator")),
-      menuItem("Dashboards", tabName = "plot_dashboard", icon = icon("chart-area"))
+      menuItem("Census Income", tabName = "income_dashboard", icon = icon("chart-area")),
+      menuItem("Census Demographics", tabName = "demographic_dashboard", icon = icon("chart-area")),
+      menuItem("Tableau Dashboard", tabName = "tableau_dashboard", icon = icon("chart-area"))
     )
   ),
   dashboardBody(
@@ -284,16 +287,44 @@ ui <- dashboardPage(
 
       # Third Tab
       tabItem(
-        tabName = "plot_dashboard",
+        tabName = "income_dashboard",
         fluidPage(
-          box(title = "Plot One", width = 6, background = "blue"),
-          box(title = "Plot Three", width = 6, background = "yellow"),
           box(
-            title = "Plot Two", 
-            width = 12, 
-            background = "green",
+            title = "Income Plot", 
+            width = 12,
+            footer = "Source: American Community Survey (5-Year Average, 2021)",
+            status = "warning",
+            
+            plotlyOutput(outputId = "plot_one")
+            ),
+          box(
+            title = "Employment Plot", 
+            width = 12,
+            footer = "Source: American Community Survey (5-Year Average, 2021)",
+            status = "warning",
             
             plotlyOutput(outputId = "plot_two"))
+        )
+      ),
+      
+      tabItem(
+        tabName = "demographic_dashboard",
+        fluidPage(
+          box(
+            title = "Languages Spoken Plot", 
+            width = 12,
+            footer = "Source: American Community Survey (5-Year Average, 2021)",
+            status = "warning",
+            
+            plotlyOutput(outputId = "plot_three")
+          ),
+          box(
+            title = "Race & Ethnicity Table", 
+            width = 12,
+            footer = "Source: US Decennial Census (2020)",
+            status = "warning",
+            
+            tableOutput(outputId = "plot_four"))
         )
       )
     )
@@ -510,30 +541,88 @@ server <- function(input, output) {
 
   
   #### THIRD PAGE
+  
+  plot_one <- reactive({
+    req(df_acs)
+    
+    
+    reduced_df_acs1 <- df_acs %>% filter(variable=="B19013_001")
+    
+    # Formatting Text for Hover Box
+    
+    reduced_df_acs1$text <- reduced_df_acs1$text <- paste0("Estimate: ", 
+                                                           scales::dollar_format()(reduced_df_acs1$estimate),
+                                                           "<br>",
+                                                           "Margin of error: ",
+                                                           scales::dollar_format()(reduced_df_acs1$moe))
+    
+    # For moe bar in plot
+    
+    ymin <- reduced_df_acs1$estimate - reduced_df_acs1$moe
+    ymax <- reduced_df_acs1$estimate + reduced_df_acs1$moe
+    
+    max_lim1 <- max(ymax)
+    
+    ## Make plot object
+    
+    p <- reduced_df_acs1 %>%
+      ggplot(aes(x = NAME, y = estimate, fill = NAME, text = text)) +
+      geom_bar(stat = 'identity', show.legend = FALSE) +
+      geom_errorbar(ymin = ymin, ymax = ymax) +
+      ggtitle("Median Household Income (2021)") +
+      scale_y_continuous(labels = scales::dollar_format()) +
+      scale_fill_okabe_ito() +
+      labs(x = NULL, y = NULL) +
+      coord_flip(ylim = c(0, max_lim1))
+    
+    
+    ## Convert to plotly object
+    
+    plot1 <- plotly::ggplotly(p, tooltip = "text")
+    
+    plot1
+    
+  })
+  
+  output$plot_one <- renderPlotly({
+    plot_one()
+  })
+      
+    
+    
+  ## PLOT TWO
   plot_two <- reactive({
     req(df_acs)
     
     ## Filter vars from acs table
     
-    Employment_status_df <- df_acs %>% filter(variable %in% c("B23025_003", "B23025_004", "B23025_005"))
+    Employment_status_df <- df_acs %>% filter(variable %in% c("B23025_003", 
+                                                              "B23025_004", 
+                                                              "B23025_005"))
     
     ## Convert to wide format
     
-    Emploment_status_df_wide <- Employment_status_df %>% pivot_wider(names_from = "variable", values_from = c("estimate", "moe"))
+    Emploment_status_df_wide <- Employment_status_df %>% 
+      pivot_wider(names_from = "variable", 
+                  values_from = c("estimate", "moe"))
     
     ## Rename columns
     
-    employment_df <- Emploment_status_df_wide %>% rename("Total" = "estimate_B23025_003", 
-                                                         "Employed_in_Civilian_Labor_Force" = "estimate_B23025_004", 
-                                                         "Unemployed_in_Civilian_Labor_Force" = "estimate_B23025_005",
-                                                         "Total_moe" = "moe_B23025_003",
-                                                         "Employed_in_Civilian_Labor_Force_moe" = "moe_B23025_004", 
-                                                         "Unemployed_in_Civilian_Labor_Force_moe" = "moe_B23025_005")
+    employment_df <- Emploment_status_df_wide %>% 
+      rename("Total" = "estimate_B23025_003", 
+             "Employed_in_Civilian_Labor_Force" = "estimate_B23025_004", 
+             "Unemployed_in_Civilian_Labor_Force" = "estimate_B23025_005",
+             "Total_moe" = "moe_B23025_003",
+             "Employed_in_Civilian_Labor_Force_moe" = "moe_B23025_004", 
+             "Unemployed_in_Civilian_Labor_Force_moe" = "moe_B23025_005")
     
     ## Calculate percentage and margin of error (mutated into two new columns)
     
     employment_df2 <- employment_df %>% 
-      mutate(Employment_rate = 100 * (Employed_in_Civilian_Labor_Force/Total), Employment_rate_moe = 100 * moe_prop(Employed_in_Civilian_Labor_Force, Total, Employed_in_Civilian_Labor_Force_moe, Total_moe))
+      mutate(Employment_rate = 100 * (Employed_in_Civilian_Labor_Force/Total), 
+             Employment_rate_moe = 100 * moe_prop(Employed_in_Civilian_Labor_Force, 
+                                                  Total, 
+                                                  Employed_in_Civilian_Labor_Force_moe, Total_moe))
     
     ## For moe bar in plot
     
@@ -556,8 +645,7 @@ server <- function(input, output) {
     ## Convert to plotly object
     
     plot2 <- plotly::ggplotly(p2)
-    
-    plot2 <- plot2 %>% layout(annotations = list(list(x = 0.4, y = -0.1, text = "Source: American Community Survey (5-Year Average, 2021)", showarrow = FALSE, xref = 'paper', yref = 'paper', xanchor = 'right', yanchor = 'auto', font = list(size = 10, color = "grey50"))))
+  
     
     ## Show Plot
     
@@ -568,8 +656,110 @@ server <- function(input, output) {
     
   output$plot_two <- renderPlotly({
     plot_two()
-  })  
+  })
+  
+  ## PLOT THREE
+  plot_three <- reactive({
+    req(df_acs)
     
+    language_df <- df_acs %>% 
+      filter(variable %in% c("C16001_001","C16001_003", "C16001_006", "C16001_009",
+                             "C16001_012", "C16001_015","C16001_018", "C16001_021",
+                             "C16001_024", "C16001_027", "C16001_030", "C16001_033", 
+                             "C16001_036"))
+    
+    ## Renaming Variables
+    
+    language_df$variable <- fct_recode(language_df$variable,
+                                       Total = "C16001_001", 
+                                       Spanish = "C16001_003", 
+                                       `French, Haitian or Cajun` = "C16001_006", 
+                                       `German or other West Germanic languages` = "C16001_009",  
+                                       `Russian, Polish or other Slavic languages` = "C16001_012", 
+                                       `Other Indo European languages` = "C16001_015", 
+                                       Korean = "C16001_018", 
+                                       `Chinese (includes Mandarin, Cantonese)` = "C16001_021",
+                                       Vietnamese = "C16001_024", 
+                                       `Tagalog (includes Filipino)` = "C16001_027", 
+                                       `Other Asian and Pacific Island languages` = "C16001_030", 
+                                       Arabic = "C16001_033", 
+                                       `Other and unspecified languages` = "C16001_036")
+    
+    language_df <- language_df %>% rename(Language_Spoken = variable)
+    
+    ## Pre_processing and adding percentages/margins of error
+    
+    small_df2 <- language_df %>% group_by(NAME) %>% slice_max(estimate, n = 4)
+    
+    small_df2 <- small_df2 %>% 
+      mutate(Total = estimate[Language_Spoken=="Total"],
+             Total_moe = moe[Language_Spoken=="Total"]) %>% 
+      subset(Language_Spoken != "Total") %>%
+      mutate(Percentage = 100 * (estimate/Total),
+             Percentage_moe = 100 * moe_prop(estimate, Total,   moe, Total_moe))
+    
+    ## Formatting text for hover box
+    
+    small_df2$text <- small_df2$text <- paste0("Estimate: ", small_df2$estimate, "<br>",
+                                               "Margin of error: ", small_df2$moe)
+    
+    
+    
+    ymin3 <- small_df2$Percentage - small_df2$Percentage_moe
+    ymax3 <- small_df2$Percentage + small_df2$Percentage_moe
+    
+    max_lim3 <- max(ymax3)
+    
+    
+    ### GROUPED BAR APPROACH ###
+    
+    p3 <- small_df2 %>% 
+      ggplot(aes(fill = Language_Spoken, y = Percentage, x = NAME, text = text)) +
+      geom_bar(position = "dodge", stat = "identity", show.legend = FALSE) + 
+      geom_errorbar(ymin = ymin3, ymax = ymax3, width = .2, position = position_dodge(.9)) + 
+      ggtitle("Languages Spoken other than English (2021)") +
+      scale_fill_okabe_ito() +
+      scale_y_continuous(labels = scales::percent_format(accuracy = 1, scale = 1)) +
+      xlab(NULL) +
+      ylab(NULL) +
+      coord_flip(ylim = c(0, max_lim3))
+    
+    
+    plot3 <- plotly::ggplotly(p3, tooltip = "text")
+    
+    plot3
+    
+  })
+  
+  output$plot_three <- renderPlotly({
+    plot_three()
+  })
+  
+  ## PLOT FOUR
+  plot_four <- reactive({
+    req(df_decennial)
+    
+    decennial_prop_table <- df_decennial %>%
+      mutate(White = White/`Total Population`,
+             `White (Not Hispanic)` = `White (Not Hispanic)`/`Total Population`,
+             Black = Black/`Total Population`,
+             `American Indian/Alaskan Native` = `American Indian/Alaskan Native`/`Total Population`,
+             Asian = Asian/`Total Population`,
+             `Native Hawaiian/Pacific Islander` = `Native Hawaiian/Pacific Islander`/`Total Population`,
+             Other = Other/ `Total Population`,
+             `Two or More Races` = `Two or More Races`/`Total Population`,
+             `Hispanic/Latino` = `Hispanic/Latino`/`Total Population`) %>% 
+      rename(County = NAME) %>% 
+      mutate_at(4:12, scales::percent) %>% 
+      select(-GEOID)
+    
+  
+    decennial_prop_table
+  })
+  
+  output$plot_four <- renderTable({
+    plot_four()
+  })
     
 }
 
