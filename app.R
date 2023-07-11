@@ -305,10 +305,26 @@ server <- function(input, output) {
   
   # Trigger this after hitting the calculate location Button
   observeEvent(input$calc_data_button, {
+    
+    
+    withProgress(message = "Pulling Geographic Information", 
+                 value = 0, 
+                 max = 30, 
+                 detail = "Calculating Stores, Cities, and Counties", {
+                   
+                   incProgress(amount = 10, message = "Loading Geographies")
+                   Sys.sleep(2)
+                   incProgress(amoun = 5, message = "Pulling Store Information .. Please Wait")
+                   
+                   StoreInfo <<- Create_Circle_Buffer(address = input$address,
+                                                      keyword = input$keyword,
+                                                      api_key = Sys.getenv("PLACES_KEY"))
+                   
+                   incProgress(amount = 15, "Process Complete")
+                   }
+                 )
   
-    StoreInfo <<- Create_Circle_Buffer(address = input$address,
-                                      keyword = input$keyword,
-                                      api_key = Sys.getenv("PLACES_KEY"))
+    
     })
   
   
