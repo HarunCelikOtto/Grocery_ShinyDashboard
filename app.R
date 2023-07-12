@@ -406,6 +406,7 @@ server <- function(input, output) {
   })
   
   observeEvent(input$map_data_button, {
+   
     # Load the named list into the global environment
     if (exists("StoreInfo")) {
       list2env(StoreInfo, envir = .GlobalEnv)
@@ -443,22 +444,32 @@ server <- function(input, output) {
                    
                    df_decennial <<- Get_Census_Vars_Decennial(df_locations = df_census_call)
                    
-                   incProgress(amount = 10, "Completing Census Requests")
+                   incProgress(amount = 5, "Loading Additional Parameters")
+                   browser()
+                   state_abbrev <- Address_Parser(input$address)[3]
+                   
+                   state_code <<- fips_codes %>% 
+                     filter(state == state_abbrev) %>%
+                     select(state_code) %>%
+                     unique() %>%
+                     as.integer()
+                   
+                   state_index <<- df_state_index %>%
+                     filter(GeoFips == state_code) %>%
+                     select(X2021) %>%
+                     as.double()
+                   
+                   DistancesList <<-  Calc_Market_Size(address = input$address, 
+                                                       df_census_call = df_census_call, 
+                                                       df_geocode = df_geocode, 
+                                                       df_grocery_only = df_grocery_only)
+                   
+                   incProgress(amount = 5, "Completing Requests")
                  })
     
     # Use the address input to find the state FIPS code for revenue calculations
-    state_abbrev <- Address_Parser(input$address)[3]
     
-    state_code <<- fips_codes %>% 
-      filter(state == state_abbrev) %>%
-      select(state_code) %>%
-      unique() %>%
-      as.integer()
-    
-    state_index <<- df_state_index %>%
-      filter(GeoFips == state_code) %>%
-      select(X2021) %>%
-      as.double()
+   
   })
   
   #### SECOND PAGE
