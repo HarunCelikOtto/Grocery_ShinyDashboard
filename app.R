@@ -275,6 +275,12 @@ ui <- dashboardPage(
           box(
             width = 4,
             collapsible = T,
+            title = "Total Estimated Revenue",
+            valueBoxOutput("estRev_vbox", width = 12)
+          ),
+          box(
+            width = 4,
+            collapsible = T,
             title = "Gross Margin Profit",
             valueBoxOutput("gross_margin_vbox", width = 12)
           ),
@@ -476,21 +482,21 @@ server <- function(input, output) {
                    
                    incProgress(amount = 5, "Completing Requests")
                  })
-    
-    # Define Reactive Calculation for Total Estimated Revenue
-    TotalEstimateRevenue <- reactive({
-      
-      req(state_index)
-      
-      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
-                             town_pop = DistancesList$city_population, 
-                             rural_pop = DistancesList$rural_population, 
-                             state_index = state_index, 
-                             est_per_price_increase = cpi)
-      
-      
-    })
    
+  })
+  
+  # Define Reactive Calculation for Total Estimated Revenue
+  TotalEstimateRevenue <- reactive({
+    
+    req(state_index)
+    
+    Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
+                           town_pop = DistancesList$city_population, 
+                           rural_pop = DistancesList$rural_population, 
+                           state_index = state_index, 
+                           est_per_price_increase = cpi)
+    
+    
   })
   
   #### SECOND PAGE
@@ -574,15 +580,24 @@ server <- function(input, output) {
                icon = icon("dollar-sign")) 
     })
     
+    ## For Estimated Revenue
+    output$estRev_vbox <- renderValueBox({
+      valueBox(floor(TotalEstimateRevenue()), 
+               subtitle = "Total Estimated Revenue", 
+               color = 'olive',
+               icon = icon("dollar-sign")) 
+    })
+    
     ## For Gross Margin Revenue
-    test_total_rev <- 120000
     
     output$gross_margin_vbox <- renderValueBox({
-      valueBox(Gross_Margin(Total_Estimated_Revenue = test_total_rev, 
-                            Percentage = input$gross_margin_pct/100), 
+
+      #test_total_rev = 100000000
+      valueBox(floor(Gross_Margin(Total_Estimated_Revenue = TotalEstimateRevenue(), 
+                            Percentage = input$gross_margin_pct/100)), 
                subtitle = sprintf("Estimated Gross Margin Profit 
                                   (based on %s as total estimated revenue)", 
-                                  test_total_rev), 
+                                  TotalEstimateRevenue()), 
                color = 'blue',
                icon = icon("dollar-sign")) 
     })
