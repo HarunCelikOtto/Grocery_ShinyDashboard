@@ -333,7 +333,8 @@ ui <- dashboardPage(
   )
 )
 
-#### SERVER SIDE #### 
+################################ SERVER SIDE ###################################
+
 server <- function(input, output) {
   
   # Loading Datasets required for automating CPI and State Index values.
@@ -476,8 +477,19 @@ server <- function(input, output) {
                    incProgress(amount = 5, "Completing Requests")
                  })
     
-    # Use the address input to find the state FIPS code for revenue calculations
-    
+    # Define Reactive Calculation for Total Estimated Revenue
+    TotalEstimateRevenue <- reactive({
+      
+      req(state_index)
+      
+      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
+                             town_pop = DistancesList$city_population, 
+                             rural_pop = DistancesList$rural_population, 
+                             state_index = state_index, 
+                             est_per_price_increase = cpi)
+      
+      
+    })
    
   })
   
