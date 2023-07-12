@@ -289,6 +289,12 @@ ui <- dashboardPage(
             collapsible = T,
             title = "Depreciation Costs",
             valueBoxOutput("depreciation_vbox", width = 12)
+          ),
+          box(
+            width = 4,
+            collapsible = T,
+            title = "Interest Expenses",
+            valueBoxOutput("intExpense_vbox", width = 12)
           )
         )
       ),
@@ -459,7 +465,7 @@ server <- function(input, output) {
                    df_decennial <<- Get_Census_Vars_Decennial(df_locations = df_census_call)
                    
                    incProgress(amount = 5, "Loading Additional Parameters")
-                   
+                   browser()
                    # Filtering for State FIPS code to match state index table value.
                    state_abbrev <- Address_Parser(input$address)[3]
                    
@@ -478,25 +484,12 @@ server <- function(input, output) {
                    DistancesList <<-  Calc_Market_Size(address = input$address, 
                                                        df_census_call = df_census_call, 
                                                        df_geocode = df_geocode, 
-                                                       df_grocery_only = df_grocery_only)
+                                                       df_grocery_only = df_grocery_only,
+                                                       state = state_abbrev$state[1])
                    
                    incProgress(amount = 5, "Completing Requests")
                  })
    
-  })
-  
-  # Define Reactive Calculation for Total Estimated Revenue
-  TotalEstimateRevenue <- reactive({
-    
-    req(state_index)
-    
-    Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
-                           town_pop = DistancesList$city_population, 
-                           rural_pop = DistancesList$rural_population, 
-                           state_index = state_index, 
-                           est_per_price_increase = cpi)
-    
-    
   })
   
   #### SECOND PAGE
@@ -557,6 +550,8 @@ server <- function(input, output) {
                      Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
     })
     
+    
+    
     # Define a reactive event to update Depreciation calculation values based on
     # selected scenario.
     DepreciationReactive <- reactive({
@@ -571,19 +566,40 @@ server <- function(input, output) {
       }
     })
     
+    # Define Reactive Calculation for Total Estimated Revenue
+    EstRevenueReactive <- reactive({
+      
+      req(state_index)
+      
+      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
+                             town_pop = DistancesList$city_population, 
+                             rural_pop = DistancesList$rural_population, 
+                             state_index = state_index, 
+                             est_per_price_increase = cpi)
+      
+      
+    })
+    
+    InterestExpReactive <- reactive({
+      Interest_Expense(Loan_Amount = input$loan_amt, 
+                       Interest_Rate = input$int_rate / 100)
+      
+    })
+    
+    
     # Output valueBox(es) to display calculated values.
     ## For Pre-Tax Profit
     output$pretax_vbox <- renderValueBox({
       valueBox(input$remodel, 
-               subtitle = "Total Estimated Pre-Tax Profit", 
+               subtitle = "Estimated Pre-Tax Profit", 
                color = 'green',
                icon = icon("dollar-sign")) 
     })
     
     ## For Estimated Revenue
     output$estRev_vbox <- renderValueBox({
-      valueBox(floor(TotalEstimateRevenue()), 
-               subtitle = "Total Estimated Revenue", 
+      valueBox(floor(EstRevenueReactive()), 
+               subtitle = "Estimated Total Revenue", 
                color = 'olive',
                icon = icon("dollar-sign")) 
     })
@@ -593,11 +609,9 @@ server <- function(input, output) {
     output$gross_margin_vbox <- renderValueBox({
 
       #test_total_rev = 100000000
-      valueBox(floor(Gross_Margin(Total_Estimated_Revenue = TotalEstimateRevenue(), 
+      valueBox(floor(Gross_Margin(Total_Estimated_Revenue = EstRevenueReactive(), 
                             Percentage = input$gross_margin_pct/100)), 
-               subtitle = sprintf("Estimated Gross Margin Profit 
-                                  (based on %s as total estimated revenue)", 
-                                  TotalEstimateRevenue()), 
+               subtitle = "Estimated Gross Margin Profit", 
                color = 'blue',
                icon = icon("dollar-sign")) 
     })
@@ -606,6 +620,13 @@ server <- function(input, output) {
     output$depreciation_vbox <- renderValueBox({
       valueBox(DepreciationReactive(),
                subtitle = "Depreciation Costs",
+               color = 'red',
+               icon = icon("circle-dollar-to-slot"))
+    })
+    
+    output$intExpense_vbox <- renderValueBox({
+      valueBox(InterestExpReactive(),
+               subtitle = "Interest Expenses",
                color = 'red',
                icon = icon("circle-dollar-to-slot"))
     })
