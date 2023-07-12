@@ -287,14 +287,14 @@ ui <- dashboardPage(
           box(
             width = 4,
             collapsible = T,
-            title = "Depreciation Costs",
-            valueBoxOutput("depreciation_vbox", width = 12)
+            title = "Secondary Income",
+            valueBoxOutput("secondaryInc_vbox", width = 12)
           ),
           box(
             width = 4,
             collapsible = T,
-            title = "Interest Expenses",
-            valueBoxOutput("intExpense_vbox", width = 12)
+            title = "Depreciation Costs",
+            valueBoxOutput("depreciation_vbox", width = 12)
           )
         )
       ),
@@ -587,6 +587,22 @@ server <- function(input, output) {
     })
     
     
+    InterestIncReactive <- reactive({
+      Interest_Income(Total_Estimated_Revenue = EstRevenueReactive())
+    })
+    
+    OtherIncReactive <- reactive({
+      Other_Income(Total_Estimated_Revenue = EstRevenueReactive())
+    })
+    
+    SecondaryIncReactive <- reactive({
+       Interest_Inc <- Interest_Income(Total_Estimated_Revenue = EstRevenueReactive())
+       Other_Inc <- Other_Income(Total_Estimated_Revenue = EstRevenueReactive())
+       
+       Secondary_Income <- Other_Inc + Interest_Inc
+    })
+    
+    
     # Output valueBox(es) to display calculated values.
     ## For Pre-Tax Profit
     output$pretax_vbox <- renderValueBox({
@@ -616,6 +632,13 @@ server <- function(input, output) {
                icon = icon("dollar-sign")) 
     })
     
+    output$secondaryInc_vbox <- renderValueBox({
+      valueBox(floor(SecondaryIncReactive()),
+               subtitle = "Secondary Income",
+               color = 'green',
+               icon = icon("circle-dollar-to-slot"))
+    })
+    
     ## For Depreciation Costs
     output$depreciation_vbox <- renderValueBox({
       valueBox(DepreciationReactive(),
@@ -624,12 +647,7 @@ server <- function(input, output) {
                icon = icon("circle-dollar-to-slot"))
     })
     
-    output$intExpense_vbox <- renderValueBox({
-      valueBox(InterestExpReactive(),
-               subtitle = "Interest Expenses",
-               color = 'red',
-               icon = icon("circle-dollar-to-slot"))
-    })
+    
 
   
   #### THIRD PAGE
