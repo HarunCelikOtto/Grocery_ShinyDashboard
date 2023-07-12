@@ -295,6 +295,12 @@ ui <- dashboardPage(
             collapsible = T,
             title = "Depreciation Costs",
             valueBoxOutput("depreciation_vbox", width = 12)
+          ),
+          box(
+            width = 4,
+            collapsible = T,
+            title = "Expenses",
+            valueBoxOutput("expenses_vbox", width = 12)
           )
         )
       ),
@@ -580,24 +586,42 @@ server <- function(input, output) {
       
     })
     
-    InterestExpReactive <- reactive({
-      Interest_Expense(Loan_Amount = input$loan_amt, 
+    ExpenseReactive <- reactive({
+      
+      Interest_Exp <- Interest_Expense(Loan_Amount = input$loan_amt, 
                        Interest_Rate = input$int_rate / 100)
+      
+      Cost_Goods_Sold <- Cost_of_Goods_Sold(Total_Estimated_Revenue = EstRevenueReactive(),
+                                            Gross_Margin_Percentage = input$gross_margin_pct)
+      
+      Employee_Wages <- Employee_Wages(Total_Estimated_Revenue = EstRevenueReactive(), 
+                                       Percentage = input$employee_pct)
+      
+      Officer_Compensation <- Officer_Compensation(Total_Estimated_Revenue = EstRevenueReactive(), 
+                                                   Percentage = input$officer_pct)
+      
+      Other_Op_Exp <- Other_Operating_Expense(Total_Estimated_Revenue = EstRevenueReactive(),
+                                              Percentage = input$other_exp_pct)
+      
+      Annual_Rent <- Annual_Rent(Monthly_Rent = input$month_rent)
+      
+      if (input$scenario_button == "scenario_one") {
+        Expenses <- Cost_Goods_Sold + Employee_Wages + Officer_Compensation + Other_Op_Exp
+        + Interest_Exp + Annual_Rent + Depr_1()
+      }
+      else {
+        Expenses <- Cost_Goods_Sold + Employee_Wages + Officer_Compensation + Other_Op_Exp
+        + Interest_Exp + Annual_Rent + Depr_2()
+      }
       
     })
     
     
-    InterestIncReactive <- reactive({
-      Interest_Income(Total_Estimated_Revenue = EstRevenueReactive())
-    })
-    
-    OtherIncReactive <- reactive({
-      Other_Income(Total_Estimated_Revenue = EstRevenueReactive())
-    })
-    
     SecondaryIncReactive <- reactive({
-       Interest_Inc <- Interest_Income(Total_Estimated_Revenue = EstRevenueReactive())
-       Other_Inc <- Other_Income(Total_Estimated_Revenue = EstRevenueReactive())
+       Interest_Inc <- Interest_Income(Total_Estimated_Revenue = EstRevenueReactive(), 
+                                       Percentage = input$int_inc_pct/100)
+       Other_Inc <- Other_Income(Total_Estimated_Revenue = EstRevenueReactive(), 
+                                 Percentage = input$other_inc_pct/100)
        
        Secondary_Income <- Other_Inc + Interest_Inc
     })
@@ -632,6 +656,7 @@ server <- function(input, output) {
                icon = icon("dollar-sign")) 
     })
     
+    ## For Secondary Income
     output$secondaryInc_vbox <- renderValueBox({
       valueBox(floor(SecondaryIncReactive()),
                subtitle = "Secondary Income",
@@ -647,6 +672,13 @@ server <- function(input, output) {
                icon = icon("circle-dollar-to-slot"))
     })
     
+    ## For Expenses
+    output$expenses_vbox <- renderValueBox({
+      valueBox(value = ExpenseReactive(),
+               subtitle = "Expenses",
+               color = 'red',
+               icon = icon("circle-dollar-to-slot"))
+    })
     
 
   
