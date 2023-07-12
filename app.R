@@ -333,10 +333,10 @@ ui <- dashboardPage(
   )
 )
 
-# Define server logic required to draw a histogram
+#### SERVER SIDE #### 
 server <- function(input, output) {
   
-  # Loading Datasets
+  # Loading Datasets required for automating CPI and State Index values.
   df_state_index <<- read.csv("loadData/State_Index_SubSet.csv")
   df_cpi <<- read.csv("loadData/CPI_Subset.csv")
   
@@ -346,14 +346,14 @@ server <- function(input, output) {
   
   
   #### FIRST PAGE
-  # Render the base leaflet map using the following settings
+  # Render the base leaflet map using the following settings.
   output$leaflet_map <- renderLeaflet({
     leaflet() %>%
       addProviderTiles(providers$OpenStreetMap) %>%
       setView(lat = 42.034534, lng = -93.620369, zoom = 6)
     })
   
-  # Trigger this after hitting the calculate location Button
+  # Trigger Circle Buffer Calculations after hitting the 'calculate location' Button
   observeEvent(input$calc_data_button, {
     
     
@@ -376,7 +376,8 @@ server <- function(input, output) {
     })
   
   
-  # REACTIVE TEST
+  # Define a reactive variable to display City, County, and State's intersecting buffer
+  # zone to use with the 'Map Data' button
   mapDataReactive <- reactive({
     
     if (exists("grocery_cities_inter")) {
@@ -398,13 +399,16 @@ server <- function(input, output) {
     }
   })
   
-  # Map Calculate Button Generates list of cities, counties and states
+  # Trigger the render of mapDataReactive() with 'Map Data' button.
   observeEvent(input$map_data_button, {
     output$map_information_ui <- renderUI({
       mapDataReactive()
     })
   })
   
+  # Trigger on 'Map Data' button the leaflet proxy with polygons added as well as retrieving the data 
+  # frames necessary for the census plots. Additionally calls the market size calculation
+  # to be used for Total Estimated Revenue
   observeEvent(input$map_data_button, {
    
     # Load the named list into the global environment
@@ -413,7 +417,8 @@ server <- function(input, output) {
     } else {
       print("StoreInfo doesn't exist.")
     }
-  
+    
+    # !Warning for leaflet plot about geometry crs is suppressed!
     suppressWarnings(leafletProxy("leaflet_map") %>%
       clearMarkers() %>%
       clearShapes() %>%
@@ -430,10 +435,12 @@ server <- function(input, output) {
                        popup = df_grocery_all$name, 
                        radius = 10))
     
+    # Progress bar for the census and market size data retrieval.
     withProgress(value = 0, 
                  max = 40, 
                  message = "Extracting Demographic Information for Area", {
                    
+                   # Retrieving census data frames 
                    req(df_census_call)
                    
                    incProgress(amount = 10, "Pulling ACS Information")
@@ -445,7 +452,8 @@ server <- function(input, output) {
                    df_decennial <<- Get_Census_Vars_Decennial(df_locations = df_census_call)
                    
                    incProgress(amount = 5, "Loading Additional Parameters")
-                   browser()
+                   
+                   # Filtering for State FIPS code to match state index table value.
                    state_abbrev <- Address_Parser(input$address)[3]
                    
                    state_code <<- fips_codes %>% 
@@ -459,6 +467,7 @@ server <- function(input, output) {
                      select(X2021) %>%
                      as.double()
                    
+                   # Generate a list of distances with the market size calculator.
                    DistancesList <<-  Calc_Market_Size(address = input$address, 
                                                        df_census_call = df_census_call, 
                                                        df_geocode = df_geocode, 
@@ -474,7 +483,7 @@ server <- function(input, output) {
   
   #### SECOND PAGE
     
-    # Change the UI output based on what radio button is selected
+    # Change scenario UI based on radio button selection
     output$scenario_ui <- renderUI({
       
       if (input$scenario_button == "scenario_one") {
@@ -486,8 +495,8 @@ server <- function(input, output) {
       }
     })
     
-    # Change Depreciation value based on scenario
-    ## Define reactive depreciation values
+    
+    # Define reactive depreciation values to call based on selected scenario options.
     Depr_1 <- reactive({
       
       req(input$remodel)
@@ -530,8 +539,8 @@ server <- function(input, output) {
                      Miscellaneous_Assets_3_Use_Life = input$misc_three_life)
     })
     
-    ## Define a reactive event to update Depreciation calculation values based on
-    ## selected scenario.
+    # Define a reactive event to update Depreciation calculation values based on
+    # selected scenario.
     DepreciationReactive <- reactive({
       
       req(input$shelves)
@@ -544,7 +553,8 @@ server <- function(input, output) {
       }
     })
     
-    # Output Value box(es)
+    # Output valueBox(es) to display calculated values.
+    ## For Pre-Tax Profit
     output$pretax_vbox <- renderValueBox({
       valueBox(input$remodel, 
                subtitle = "Total Estimated Pre-Tax Profit", 
@@ -552,6 +562,7 @@ server <- function(input, output) {
                icon = icon("dollar-sign")) 
     })
     
+    ## For Gross Margin Revenue
     test_total_rev <- 120000
     
     output$gross_margin_vbox <- renderValueBox({
@@ -564,7 +575,7 @@ server <- function(input, output) {
                icon = icon("dollar-sign")) 
     })
     
-    # Should change based on which depreciation calculation is running
+    ## For Depreciation Costs
     output$depreciation_vbox <- renderValueBox({
       valueBox(DepreciationReactive(),
                subtitle = "Depreciation Costs",
@@ -575,13 +586,16 @@ server <- function(input, output) {
   
   #### THIRD PAGE
   
+  # Create Census Plots
+    
+  ## Define Reactive Plot One
   plot_one <- reactive({
     req(df_acs)
     
     
     reduced_df_acs1 <- df_acs %>% filter(variable=="B19013_001")
     
-    # Formatting Text for Hover Box
+    ## Formatting Text for Hover Box
     
     reduced_df_acs1$text <- reduced_df_acs1$text <- paste0("Estimate: ", 
                                                            scales::dollar_format()(reduced_df_acs1$estimate),
@@ -589,7 +603,7 @@ server <- function(input, output) {
                                                            "Margin of error: ",
                                                            scales::dollar_format()(reduced_df_acs1$moe))
     
-    # For moe bar in plot
+    ## For moe bar in plot
     
     ymin <- reduced_df_acs1$estimate - reduced_df_acs1$moe
     ymax <- reduced_df_acs1$estimate + reduced_df_acs1$moe
@@ -617,13 +631,15 @@ server <- function(input, output) {
     
   })
   
+   
+  ## Render Reactive Plot One
   output$plot_one <- renderPlotly({
     plot_one()
   })
       
     
     
-  ## PLOT TWO
+  ## Define Reactive Plot Two
   plot_two <- reactive({
     req(df_acs)
     
@@ -686,12 +702,12 @@ server <- function(input, output) {
     
   })
     
-    
+  ## Render Reactive Plot Two  
   output$plot_two <- renderPlotly({
     plot_two()
   })
   
-  ## PLOT THREE
+  ## Define Reactive Plot Three
   plot_three <- reactive({
     req(df_acs)
     
@@ -764,11 +780,12 @@ server <- function(input, output) {
     
   })
   
+  # Render Reactive Plot Three
   output$plot_three <- renderPlotly({
     plot_three()
   })
   
-  ## PLOT FOUR
+  ## Define Reactive Plot Four (TABLE)
   plot_four <- reactive({
     req(df_decennial)
     
@@ -790,6 +807,7 @@ server <- function(input, output) {
     decennial_prop_table
   })
   
+  ## Render Reactive Plot Four (TABLE)
   output$plot_four <- renderTable({
     plot_four()
   })
