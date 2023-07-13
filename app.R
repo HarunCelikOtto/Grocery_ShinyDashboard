@@ -313,7 +313,8 @@ ui <- dashboardPage(
             ),
             
             # Percentages Adding to Revenue
-            HTML("<h4> Percentages Added to Revenue </h4>"),
+            HTML("<h4><center> Percentages Added to Revenue </center></h4>"),
+
             
             sliderInput(
               inputId = "gross_margin_pct",
@@ -342,7 +343,7 @@ ui <- dashboardPage(
             
             
             # Percentages Added to Expenses
-            HTML("<h4> Percentages Added to Expenses </h4>"),
+            HTML("<h4><center> Percentages Added to Expenses </center></h4>"),
             sliderInput(
               inputId = "employee_pct",
               label = "Employee Wages Percentage",
