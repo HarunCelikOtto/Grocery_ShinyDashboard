@@ -6,7 +6,7 @@ tagList(
   
   numericInput(inputId = "parklot", 
                label = "Parking Lot Improvements", 
-               value = 50000, step = 100),
+               value = 0, step = 100),
   
   numericInput(inputId = "shelves", 
                label = "Shelving Check Out Counters", 
