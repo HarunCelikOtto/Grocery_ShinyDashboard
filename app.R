@@ -116,12 +116,98 @@ ui <- dashboardPage(
             width = 12,
             collapsible = TRUE,
             title = "Step Two: Profit Estimation",
-            status = "success",
+            status = "warning",
             
             HTML("<h3> Profit Estimation Overview </h3>
+                 <p> If the mapping component runs successfully, a total estimated revenue value will be calculated for use in the 'Profit Estimation' 
+                 section. This portion of the tool contains the same calculations provided by the FFED Extension Excel tool for estimating the pre-tax profit
+                 of opening up a grocery store in the designated area.</p>
+                 
+                 <h4> Calculations </h4>
+                 <p> The user should initially select one of the two scenario options which provide different estimations and user inputs.</p>
+                 
+                 <h5> Scenario One - Owned Building </h5> 
+                 <p> The building is owned by the business that is operating the store. In this case the building would generally be 
+                 depreciated over 39 years, unless the building's useful life is believed to be less than 39 years.
+                 Values which are specific to scenario one are;
+                 
+                 <ul>
+                 <li>Building Remodel Costs - cost of remodeling purchased grocery store</li>
+                 <li>Parking Lot Improvements - cost for parking lot improvements</li>
+                 </ul>
+                 
+                 </p>
+                 
+                 <h5> Scenario Two - Leased Building </h5> 
+                 <p> The building is owned by a third party and periodic rent is paid, typically monthly. 
+                 In this case there would be no depreciation. Values which are specific to scenario two are;
+                 
+                 <ul> 
+                 <li>Monthly Rent - rent cost per month</li>
+                 <li>Leasehold Improvements - cost of improving rented grocery store</li>
+                 <li>Leasehold Improvements Use Life - use life of leasehold improvements in years</li>
+                 </ul>
+                 
+                 </p>
+                 
+                 <h5> Shared Inputs </h5>
+                 <p> The following are a list of inputs and short definitions which are shared between the two 
+                 presented scenarios available in the calculation tool. </p> 
+                 
+                 <ul> 
+                 <li>Loan Amount - amount taken for loan</li>
+                 <li>Interest Rate - interest on the loan as a percentage</li> 
+                 <li>Shelving Check Out Counters - shelving and register infrastructure</li>
+                 <li>Computer Equipment POS - computer equipment costs</li>
+                 <li>Vehicles - vehicle purchase costs</li>
+                 <li>Display Cases - display cases purchase and setup costs</li>
+                 <li>Refrigeration - refrigeration purchase and setup costs</li>
+                 <li>Freezers - freezer purchase and setup costs</li>
+                 <li>Meat Cutting Equipment - meat cutting equipment purchase and setup costs</li>
+                 <li>Miscellaneous Assets - an optional asset to evaluate</li>
+                 <li>Miscellaneous Asset Life - use life of asset in years</li>
+                 </ul>
+                 </p>
+                 
+                 <h5> Percentages </h5>
+                 <p> 
+                 
+                 <ul> 
+                 <li>Gross Margin Percentage - percentage of total estimated revenue after subtracting cost of goods</li>
+                 <li>Employee Wages Percentage - percentage of the total estimated revenue spent on employee wages</li> 
+                 <li>Officer Compensation Percentage - percentage of the total estimated revenue spent on officer compensation</li>
+                 <li>Other Operating Expense Percentage - percentage of the total estimated revenue spent on operating expenses</li>
+                 <li>Other Income Percentage - percentage of other income constituting secondary income</li>
+                 <li>Interest Income Percentage - percentage of interest income constituting secondary income</li>
+                 </ul>
+                 
+                 </p>
+                 
+                 <h5> Informational Value Boxes </h5>
+                 <p> As the user inputs values in each of the sections and adjusts the sliders for percentages,
+                 the value boxes on the right hand side should adjust dynamically, allowing the user to select values
+                 and percentages based on their needs. The value box names and their definitions are;
+                 
+                 <ul> 
+                 <li>Pre-Tax Profit - Total Estimated Revenue + Secondary Income - Expenses</li>
+                 <li>Total Estimated Revenue - Determined by metro, town, rural populations and market size</li> 
+                 <li>Gross Margin - Total Estimated Revenue - Cost of Goods Sold</li>
+                 <li>Secondary Income - Other Income + Interest Income</li>
+                 <li>Depreciation Costs - Varies based on scenario but the sum of all asset costs</li>
+                 <li>Expenses - The sum of Cost of Goods Sold, Wages, Operating and Interest Expenses, and Depreciation costs</li>
+                 </ul>
+                 </p>
+                 
+                 <h5> Potential Errors </h5>
+                 <p> There are usually two things that can go wrong with this section. The first is that the values don't load up in the 
+                 value boxes and the second is values which come out as infinities in the value boxes. The following are potential troubleshoots.
                  
                  
-                 ")
+                 <ol> 
+                 <li>Refresh the 'Profit Estimation' tab if values don't update</li>
+                 <li>Remove any 0's in the use life inputs since these values get divided and therefore cause the infinity errors</li>
+                 </ol>
+                 </p>")
             
             )
           )
@@ -225,116 +311,63 @@ ui <- dashboardPage(
               value = 5,
               step = 0.05
             ),
-            box(
-              title = "Percentages", 
-              width = 12, 
-              collapsible = T, 
-              solidHeader = T, 
-              status = "primary", 
-              collapsed = T,
-             
-              sliderInput(
-                inputId = "gross_margin_pct",
-                label = "Gross Margin Percentage",
-                min = 22,
-                max = 26.5,
-                value = 24,
-                step = 0.05
-              ),
-              sliderInput(
-                inputId = "employee_pct",
-                label = "Employee Wages Percentage",
-                min = 6,
-                max = 12,
-                value = 9,
-                step = 0.05
-              ),
-              sliderInput(
-                inputId = "officer_pct",
-                label = "Officer Compensation Percentage",
-                min = 0,
-                max = 5,
-                value = 1,
-                step = 0.05
-              ),
-              sliderInput(
-                inputId = "other_exp_pct",
-                label = "Other Operating Expense Percentage",
-                min = 8,
-                max = 12,
-                value = 11,
-                step = 0.05
-              ),
-              sliderInput(
-                inputId = "other_inc_pct",
-                label = "Other Income Percentage",
-                min = 0,
-                max = 2,
-                value = 0.01,
-                step = 0.001
-              ),
-              sliderInput(
-                inputId = "int_inc_pct",
-                label = "Interest Income Percentage",
-                min = 0,
-                max = 0.5,
-                value = 0.0012,
-                step = 0.001
-              )
+            
+            # Percentages Adding to Revenue
+            HTML("<h4> Percentages Added to Revenue </h4>"),
+            
+            sliderInput(
+              inputId = "gross_margin_pct",
+              label = "Gross Margin Percentage",
+              min = 22,
+              max = 26.5,
+              value = 24,
+              step = 0.05
+            ),
+            sliderInput(
+              inputId = "other_inc_pct",
+              label = "Other Income Percentage",
+              min = 0,
+              max = 2,
+              value = 0.01,
+              step = 0.001
+            ),
+            sliderInput(
+              inputId = "int_inc_pct",
+              label = "Interest Income Percentage",
+              min = 0,
+              max = 0.5,
+              value = 0.0012,
+              step = 0.001
             ),
             
-            # Value Index section
-            HTML("<h3> Value Index </h3>
-                 
-                 <p> The following are a list of inputs for the two possible scenarios 
-                 available in the calculation tool. Regardless of the scenario, the tool requires
-                 the following values. </p> 
-                 
-                 <ul> 
-                 <li>Monthly Rent - rent cost per month</li>
-                 <li>Loan Amount - amount taken for loan</li>
-                 <li>Interest Rate - interest on the loan as a percentage</li>
-                 </ul>
-                 
-                 
-                 <p> Each scenario requires the following values.</p>
-                 
-                 <ul> 
-                 <li>Parking Lot Improvements - cost for parking lot improvements</li>
-                 <li>Shelving Check Out Counters - ???</li>
-                 <li>Computer Equipment POS - ??? computer equipment costs</li>
-                 <li>Vehicles - vehicle purchase costs</li>
-                 <li>Display Cases - cost of display cases</li>
-                 <li>Refrigeration - refrigeration setup costs</li>
-                 <li>Freezers - freezer setup costs</li>
-                 <li>Meat Cutting Equipment - meat cutting equipment costs</li>
-                 <li>Miscellaneous Assets - an optional asset to evaluate</li>
-                 <li>Miscellaneous Asset Life - use life of asset in years</li>
-                 </ul>"),
-            HTML("<h4> Scenario One - Building / Remodeling </h4>
-                 
-                 <p> In scenario One, the user is either building the grocery 
-                 store anew or as part of a remodeling effort. Once 'Scenario One'
-                 is selected in the 'Select Scenario' menu, a set of cost inputs
-                 will open to the right. </p>
-                 
-                 <p> Scenario One requires the following additional value(s)</p>
-                 
-                 <ul> 
-                 <li>Building Remodel Costs - cost of remodeling purchased grocery store</li>
-                 </ul>"),
-            HTML(
-              "<h4> Scenario Two - Renting </h4>",
-              "<p> In scenario Two, the user is renting the grocery store. 
-                 Once 'Scenario Two' is selected in the 'Select Scenario' menu, 
-                 a set of additional cost inputs will open to the right</p>
-                 
-                  <p> Scenario Two requires the following additional value(s)</p>
-                 
-                 <ul> 
-                 <li>Leasehold Improvements - cost of improving rented grocery store</li>
-                 </ul>"
+            
+            # Percentages Added to Expenses
+            HTML("<h4> Percentages Added to Expenses </h4>"),
+            sliderInput(
+              inputId = "employee_pct",
+              label = "Employee Wages Percentage",
+              min = 6,
+              max = 12,
+              value = 9,
+              step = 0.05
+            ),
+            sliderInput(
+              inputId = "officer_pct",
+              label = "Officer Compensation Percentage",
+              min = 0,
+              max = 5,
+              value = 1,
+              step = 0.05
+            ),
+            sliderInput(
+              inputId = "other_exp_pct",
+              label = "Other Operating Expense Percentage",
+              min = 8,
+              max = 12,
+              value = 11,
+              step = 0.05
             )
+            
           ),
           box(
             width = 4,
