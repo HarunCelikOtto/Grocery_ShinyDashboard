@@ -54,161 +54,30 @@ ui <- dashboardPage(
           box(
             width = 12,
             collapsible = TRUE,
-            collapsed = T,
+            collapsed = F,
             title = "Step One: Using the Map",
             status = "success",
             
-            HTML("<h3> Map Overview </h3>
-                 
-                 <p> The 'Store Map' navigation tab contains the mapping tool which generates a visual
-                 representation of a market area. This calculation is <b> not the same as the 
-                 one indicated in the Excel tool provided by ISU's FFED Extension </b> and
-                 should therefore be used only as a visual reference. 
-                 The calculation for the market area circle takes a user provided 
-                 address as its center and buffers the circle as far as half the distance of the furthest grocery
-                 store in four quadrants of the circle (NE, NW, SE, SW). </p>
-                 
-                 <h4> Using the Map </h4>
-                 <p> The mapping tool is split into two operations which are calculated after the user has
-                 defined their address and store type search. The tool should be used in the following order.</p>
-                 
-                 <h5> Address </h5>
-                 <p>The user should provide a potential store address which follows the format of <b>Street, City, State (abbreviation)</b>. 
-                 The tool parses the address by commas so a comma should be inserted between each component of the address.</p>
-                 
-                 <h5> Type of Store </h5>
-                 <p> The type of store field is a keyword that is provided to the Google API to pull in store information.
-                 By default this value is set to 'grocery' and should ideally be kept that way for most purposes. Exceptions may
-                 include trying to map out the dollar stores in an area, though the closest ones will already be displayed with the
-                 default value.</p>
-                 
-                 <h5> Calculate Location </h5>
-                 <p> Once the address and store type inputs are defined, the user should click the 'Calculate Location' button.
-                 This button will call the necessary functions to generate a circle buffer. On average this will take 20 seconds or so,
-                 but internet connections may change that load time. Refer to the progress bar at the bottom right of the screen after
-                 clicking to check if run time is complete.</p>
-                 
-                 <h5> Map Retrieved Data </h5>
-                 <p> Once the run time is completed after the 'Calculate Location' button is clicked, the user should click 
-                 'Map Retrieved Data' button. Like the previous button, this will generate a progress bar that displays the run time 
-                 of the mapping process. Once complete, the user should see that the map has generated some points which display
-                 the area size outlined in red, cities in blue, and nearby stores in green. If a market size is successfully generated
-                 then the 'Map Data' section should be populated with all of the cities and counties intersecting the area size.</p>
-                 
-                 <h5> Potential Errors </h5>
-                 <p> In this process there are a lot of external calls to data sources that may generate some issues. Usually the application
-                 will time out if there is an error, and the user can try the following to fix the errors.
-                 
-                 <ol> 
-                 <li>Checking that the address is formatted properly</li>
-                 <li>Entering an address in a more general area (ie, 'Main Street' instead of '100 Main Street') </li>
-                 <li>Keeping the store type value to 'grocery' as its default</li>
-                 <li>Refreshing the app</li>
-                 <li>Restarting the app by closing it and reopening it</li>
-                 </ol>
-                 
-                 If none of these fixes seem to work, it may likely be that one of our external data sources is under maintenance or has
-                 changed rendering the tool temporarily unuseable. Common problems are addresses which can't be geocoded, one alternative way to check
-                 is to see if the address shows up on a Google Maps entry.
-                 </p>")
+            source(file = "R/StepOne.R")[1]
+            
             ),
           box(
             width = 12,
             collapsible = TRUE,
+            collapsed = F,
             title = "Step Two: Profit Estimation",
             status = "warning",
             
-            HTML("<h3> Profit Estimation Overview </h3>
-                 <p> If the mapping component runs successfully, a total estimated revenue value will be calculated for use in the 'Profit Estimation' 
-                 section. This portion of the tool contains the same calculations provided by the FFED Extension Excel tool for estimating the pre-tax profit
-                 of opening up a grocery store in the designated area.</p>
-                 
-                 <h4> Calculations </h4>
-                 <p> The user should initially select one of the two scenario options which provide different estimations and user inputs.</p>
-                 
-                 <h5> Scenario One - Owned Building </h5> 
-                 <p> The building is owned by the business that is operating the store. In this case the building would generally be 
-                 depreciated over 39 years, unless the building's useful life is believed to be less than 39 years.
-                 Values which are specific to scenario one are;
-                 
-                 <ul>
-                 <li>Building Remodel Costs - cost of remodeling purchased grocery store</li>
-                 <li>Parking Lot Improvements - cost for parking lot improvements</li>
-                 </ul>
-                 
-                 </p>
-                 
-                 <h5> Scenario Two - Leased Building </h5> 
-                 <p> The building is owned by a third party and periodic rent is paid, typically monthly. 
-                 In this case there would be no depreciation. Values which are specific to scenario two are;
-                 
-                 <ul> 
-                 <li>Monthly Rent - rent cost per month</li>
-                 <li>Leasehold Improvements - cost of improving rented grocery store</li>
-                 <li>Leasehold Improvements Use Life - use life of leasehold improvements in years</li>
-                 </ul>
-                 
-                 </p>
-                 
-                 <h5> Shared Inputs </h5>
-                 <p> The following are a list of inputs and short definitions which are shared between the two 
-                 presented scenarios available in the calculation tool. </p> 
-                 
-                 <ul> 
-                 <li>Loan Amount - amount taken for loan</li>
-                 <li>Interest Rate - interest on the loan as a percentage</li> 
-                 <li>Shelving Check Out Counters - shelving and register infrastructure</li>
-                 <li>Computer Equipment POS - computer equipment costs</li>
-                 <li>Vehicles - vehicle purchase costs</li>
-                 <li>Display Cases - display cases purchase and setup costs</li>
-                 <li>Refrigeration - refrigeration purchase and setup costs</li>
-                 <li>Freezers - freezer purchase and setup costs</li>
-                 <li>Meat Cutting Equipment - meat cutting equipment purchase and setup costs</li>
-                 <li>Miscellaneous Assets - an optional asset to evaluate</li>
-                 <li>Miscellaneous Asset Life - use life of asset in years</li>
-                 </ul>
-                 </p>
-                 
-                 <h5> Percentages </h5>
-                 <p> 
-                 
-                 <ul> 
-                 <li>Gross Margin Percentage - percentage of total estimated revenue after subtracting cost of goods</li>
-                 <li>Employee Wages Percentage - percentage of the total estimated revenue spent on employee wages</li> 
-                 <li>Officer Compensation Percentage - percentage of the total estimated revenue spent on officer compensation</li>
-                 <li>Other Operating Expense Percentage - percentage of the total estimated revenue spent on operating expenses</li>
-                 <li>Other Income Percentage - percentage of other income constituting secondary income</li>
-                 <li>Interest Income Percentage - percentage of interest income constituting secondary income</li>
-                 </ul>
-                 
-                 </p>
-                 
-                 <h5> Informational Value Boxes </h5>
-                 <p> As the user inputs values in each of the sections and adjusts the sliders for percentages,
-                 the value boxes on the right hand side should adjust dynamically, allowing the user to select values
-                 and percentages based on their needs. The value box names and their definitions are;
-                 
-                 <ul> 
-                 <li>Pre-Tax Profit - Total Estimated Revenue + Secondary Income - Expenses</li>
-                 <li>Total Estimated Revenue - Determined by metro, town, rural populations and market size</li> 
-                 <li>Gross Margin - Total Estimated Revenue - Cost of Goods Sold</li>
-                 <li>Secondary Income - Other Income + Interest Income</li>
-                 <li>Depreciation Costs - Varies based on scenario but the sum of all asset costs</li>
-                 <li>Expenses - The sum of Cost of Goods Sold, Wages, Operating and Interest Expenses, and Depreciation costs</li>
-                 </ul>
-                 </p>
-                 
-                 <h5> Potential Errors </h5>
-                 <p> There are usually two things that can go wrong with this section. The first is that the values don't load up in the 
-                 value boxes and the second is values which come out as infinities in the value boxes. The following are potential troubleshoots.
-                 
-                 
-                 <ol> 
-                 <li>Refresh the 'Profit Estimation' tab if values don't update</li>
-                 <li>Remove any 0's in the use life inputs since these values get divided and therefore cause the infinity errors</li>
-                 </ol>
-                 </p>")
+            source(file = "R/StepTwo.R")[1]
+            ),
+          
+          box(
+            width = 12,
+            collapsible = TRUE,
+            title = "Plot Information",
+            status = "warning",
             
+            source(file = "R/StepThree.R")[1]
             )
           )
         ),
@@ -639,11 +508,11 @@ server <- function(input, output) {
     output$scenario_ui <- renderUI({
       
       if (input$scenario_button == "scenario_one") {
-        source(file = "R/Scenario_One.R", local = T)
+        source(file = "R/Scenario_One.R")[1]
       } 
       
       else if (input$scenario_button == "scenario_two") {
-        source(file = "R/Scenario_Two.R")
+        source(file = "R/Scenario_Two.R")[1]
       }
     })
     
@@ -658,6 +527,18 @@ server <- function(input, output) {
       else if (input$scenario_button == "scenario_one") {
         NULL
       }
+      
+    })
+    
+    # Define Reactive Calculation for Total Estimated Revenue
+    EstRevenueReactive <- reactive({
+      
+      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
+                             town_pop = DistancesList$city_population, 
+                             rural_pop = DistancesList$rural_population, 
+                             state_index = state_index, 
+                             est_per_price_increase = cpi)
+      
       
     })
     
@@ -720,18 +601,6 @@ server <- function(input, output) {
       }
     })
   
-    
-    # Define Reactive Calculation for Total Estimated Revenue
-    EstRevenueReactive <- reactive({
-      
-      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
-                             town_pop = DistancesList$city_population, 
-                             rural_pop = DistancesList$rural_population, 
-                             state_index = state_index, 
-                             est_per_price_increase = cpi)
-      
-      
-    })
     
     ExpenseReactive <- reactive({
       
