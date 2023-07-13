@@ -4,8 +4,8 @@ tagList(
                value = 50000, step = 100),
   
   numericInput(inputId = "leasehold_life", 
-               label = "Leasehold Improvements Use Life", 
-               value = 50000, step = 100),
+               label = "Leasehold Improvements Use Life (years)", 
+               value = 10, step = 100),
   
   numericInput(inputId = "shelves", 
                label = "Shelving Check Out Counters", 
