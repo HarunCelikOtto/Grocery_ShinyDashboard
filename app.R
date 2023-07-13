@@ -130,12 +130,20 @@ ui <- dashboardPage(
               step = 100,
               min = 0
             ),
+            sliderInput(
+              inputId = "int_rate",
+              label = "Interest Rate",
+              min = 0,
+              max = 15,
+              value = 5,
+              step = 0.05
+            ),
             radioButtons(
               inputId = "scenario_button",
               label = "Select Scenario:",
               choices = c(
-                "Scenario One" = "scenario_one",
-                "Scenario Two" = "scenario_two"
+                "Owned Building" = "scenario_one",
+                "Leased Building" = "scenario_two"
               ),
               selected = "scenario_one"
             ),
@@ -146,15 +154,7 @@ ui <- dashboardPage(
               solidHeader = T, 
               status = "primary", 
               collapsed = T,
-              
-              sliderInput(
-                inputId = "int_rate",
-                label = "Interest Rate",
-                min = 0,
-                max = 15,
-                value = 5,
-                step = 0.05
-              ),
+             
               sliderInput(
                 inputId = "gross_margin_pct",
                 label = "Gross Margin Percentage",
@@ -173,7 +173,7 @@ ui <- dashboardPage(
               ),
               sliderInput(
                 inputId = "officer_pct",
-                label = "Employee Wages Percentage",
+                label = "Officer Compensation Percentage",
                 min = 0,
                 max = 5,
                 value = 1,
@@ -260,7 +260,7 @@ ui <- dashboardPage(
           ),
           box(
             width = 4,
-            title = "Scenario Estimations",
+            title = "Expense Estimations",
             solidHeader = TRUE,
             
             #uiOutput for scenario-based inputs
@@ -471,7 +471,7 @@ server <- function(input, output) {
                    df_decennial <<- Get_Census_Vars_Decennial(df_locations = df_census_call)
                    
                    incProgress(amount = 5, "Loading Additional Parameters")
-                   browser()
+
                    # Filtering for State FIPS code to match state index table value.
                    state_abbrev <- Address_Parser(input$address)[3]
                    
@@ -571,11 +571,10 @@ server <- function(input, output) {
         Depr_2()
       }
     })
+  
     
     # Define Reactive Calculation for Total Estimated Revenue
     EstRevenueReactive <- reactive({
-      
-      req(state_index)
       
       Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
                              town_pop = DistancesList$city_population, 
@@ -588,8 +587,11 @@ server <- function(input, output) {
     
     ExpenseReactive <- reactive({
       
+      req(input$shelves)
+      req(input$loan_amt)
+      
       Interest_Exp <- Interest_Expense(Loan_Amount = input$loan_amt, 
-                       Interest_Rate = input$int_rate / 100)
+                                       Interest_Rate = input$int_rate / 100)
       
       Cost_Goods_Sold <- Cost_of_Goods_Sold(Total_Estimated_Revenue = EstRevenueReactive(),
                                             Gross_Margin_Percentage = input$gross_margin_pct)
@@ -606,13 +608,25 @@ server <- function(input, output) {
       Annual_Rent <- Annual_Rent(Monthly_Rent = input$month_rent)
       
       if (input$scenario_button == "scenario_one") {
-        Expenses <- Cost_Goods_Sold + Employee_Wages + Officer_Compensation + Other_Op_Exp
-        + Interest_Exp + Annual_Rent + Depr_1()
+        Expenses <- Cost_Goods_Sold + 
+          Employee_Wages + 
+          Officer_Compensation + 
+          Other_Op_Exp + 
+          Interest_Exp + 
+          Annual_Rent + 
+          Depr_1()
       }
-      else {
-        Expenses <- Cost_Goods_Sold + Employee_Wages + Officer_Compensation + Other_Op_Exp
-        + Interest_Exp + Annual_Rent + Depr_2()
+      else if (input$scenario_button == "scenario_two") {
+        Expenses <- Cost_Goods_Sold + 
+          Employee_Wages + 
+          Officer_Compensation + 
+          Other_Op_Exp + 
+          Interest_Exp + 
+          Annual_Rent + 
+          Depr_2()
       }
+      
+      Expenses
       
     })
     
@@ -626,11 +640,15 @@ server <- function(input, output) {
        Secondary_Income <- Other_Inc + Interest_Inc
     })
     
+    PretaxReactive <- reactive({
+      EstRevenueReactive() + SecondaryIncReactive() - ExpenseReactive()
+    })
+    
     
     # Output valueBox(es) to display calculated values.
     ## For Pre-Tax Profit
     output$pretax_vbox <- renderValueBox({
-      valueBox(input$remodel, 
+      valueBox(floor(PretaxReactive()), 
                subtitle = "Estimated Pre-Tax Profit", 
                color = 'green',
                icon = icon("dollar-sign")) 
@@ -674,7 +692,7 @@ server <- function(input, output) {
     
     ## For Expenses
     output$expenses_vbox <- renderValueBox({
-      valueBox(value = ExpenseReactive(),
+      valueBox(ceiling(ExpenseReactive()),
                subtitle = "Expenses",
                color = 'red',
                icon = icon("circle-dollar-to-slot"))
