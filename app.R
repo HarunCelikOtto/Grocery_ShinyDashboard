@@ -35,15 +35,97 @@ ui <- dashboardPage(
   dashboardHeader(title = "DSPG Grocery Stores"),
   dashboardSidebar(
     sidebarMenu(
+      menuItem("Tool Overview", tabName = "instruction_dashboard", icon = icon("map-location-dot")),
       menuItem("Store Map", tabName = "map_dashboard", icon = icon("map-location-dot")),
-      menuItem("User Inputs", tabName = "user_dashboard", icon = icon("calculator")),
+      menuItem("Profit Estimation", tabName = "user_dashboard", icon = icon("calculator")),
       menuItem("Census Income", tabName = "income_dashboard", icon = icon("chart-area")),
       menuItem("Census Demographics", tabName = "demographic_dashboard", icon = icon("chart-area")),
-      menuItem("Tableau Dashboard", tabName = "tableau_dashboard", icon = icon("chart-area"))
+      menuItem("Rural Store Analysis", tabName = "ruralstore_dashboard", icon = icon("chart-area"))
     )
   ),
   dashboardBody(
     tabItems(
+      
+      # Instructions Tab
+      tabItem(
+        tabName = "instruction_dashboard",
+        fluidRow(
+          
+          box(
+            width = 12,
+            collapsible = TRUE,
+            collapsed = T,
+            title = "Step One: Using the Map",
+            status = "success",
+            
+            HTML("<h3> Map Overview </h3>
+                 
+                 <p> The 'Store Map' navigation tab contains the mapping tool which generates a visual
+                 representation of a market area. This calculation is <b> not the same as the 
+                 one indicated in the Excel tool provided by ISU's FFED Extension </b> and
+                 should therefore be used only as a visual reference. 
+                 The calculation for the market area circle takes a user provided 
+                 address as its center and buffers the circle as far as half the distance of the furthest grocery
+                 store in four quadrants of the circle (NE, NW, SE, SW). </p>
+                 
+                 <h4> Using the Map </h4>
+                 <p> The mapping tool is split into two operations which are calculated after the user has
+                 defined their address and store type search. The tool should be used in the following order.</p>
+                 
+                 <h5> Address </h5>
+                 <p>The user should provide a potential store address which follows the format of <b>Street, City, State (abbreviation)</b>. 
+                 The tool parses the address by commas so a comma should be inserted between each component of the address.</p>
+                 
+                 <h5> Type of Store </h5>
+                 <p> The type of store field is a keyword that is provided to the Google API to pull in store information.
+                 By default this value is set to 'grocery' and should ideally be kept that way for most purposes. Exceptions may
+                 include trying to map out the dollar stores in an area, though the closest ones will already be displayed with the
+                 default value.</p>
+                 
+                 <h5> Calculate Location </h5>
+                 <p> Once the address and store type inputs are defined, the user should click the 'Calculate Location' button.
+                 This button will call the necessary functions to generate a circle buffer. On average this will take 20 seconds or so,
+                 but internet connections may change that load time. Refer to the progress bar at the bottom right of the screen after
+                 clicking to check if run time is complete.</p>
+                 
+                 <h5> Map Retrieved Data </h5>
+                 <p> Once the run time is completed after the 'Calculate Location' button is clicked, the user should click 
+                 'Map Retrieved Data' button. Like the previous button, this will generate a progress bar that displays the run time 
+                 of the mapping process. Once complete, the user should see that the map has generated some points which display
+                 the area size outlined in red, cities in blue, and nearby stores in green. If a market size is successfully generated
+                 then the 'Map Data' section should be populated with all of the cities and counties intersecting the area size.</p>
+                 
+                 <h5> Potential Errors </h5>
+                 <p> In this process there are a lot of external calls to data sources that may generate some issues. Usually the application
+                 will time out if there is an error, and the user can try the following to fix the errors.
+                 
+                 <ol> 
+                 <li>Checking that the address is formatted properly</li>
+                 <li>Entering an address in a more general area (ie, 'Main Street' instead of '100 Main Street') </li>
+                 <li>Keeping the store type value to 'grocery' as its default</li>
+                 <li>Refreshing the app</li>
+                 <li>Restarting the app by closing it and reopening it</li>
+                 </ol>
+                 
+                 If none of these fixes seem to work, it may likely be that one of our external data sources is under maintenance or has
+                 changed rendering the tool temporarily unuseable. Common problems are addresses which can't be geocoded, one alternative way to check
+                 is to see if the address shows up on a Google Maps entry.
+                 </p>")
+            ),
+          box(
+            width = 12,
+            collapsible = TRUE,
+            title = "Step Two: Profit Estimation",
+            status = "success",
+            
+            HTML("<h3> Profit Estimation Overview </h3>
+                 
+                 
+                 ")
+            
+            )
+          )
+        ),
 
       # First Tab
       tabItem(
@@ -115,14 +197,19 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             
-            
-            numericInput(
-              inputId = "month_rent",
-              label = "Monthly Rent",
-              value = 2500,
-              step = 100,
-              min = 0
+            radioButtons(
+              inputId = "scenario_button",
+              label = "Select Scenario:",
+              choices = c(
+                "Owned Building" = "scenario_one",
+                "Leased Building" = "scenario_two"
+              ),
+              selected = "scenario_one"
             ),
+            
+            # Monthly Rent if Scenario One
+            uiOutput(outputId = "month_box"),
+            
             numericInput(
               inputId = "loan_amt",
               label = "Loan Amount",
@@ -137,15 +224,6 @@ ui <- dashboardPage(
               max = 15,
               value = 5,
               step = 0.05
-            ),
-            radioButtons(
-              inputId = "scenario_button",
-              label = "Select Scenario:",
-              choices = c(
-                "Owned Building" = "scenario_one",
-                "Leased Building" = "scenario_two"
-              ),
-              selected = "scenario_one"
             ),
             box(
               title = "Percentages", 
@@ -198,10 +276,10 @@ ui <- dashboardPage(
               sliderInput(
                 inputId = "int_inc_pct",
                 label = "Interest Income Percentage",
-                min = 6,
-                max = 12,
-                value = 9,
-                step = 0.05
+                min = 0,
+                max = 0.5,
+                value = 0.0012,
+                step = 0.001
               )
             ),
             
@@ -346,6 +424,27 @@ ui <- dashboardPage(
             
             tableOutput(outputId = "plot_four"))
         )
+      ),
+      
+      tabItem(
+        tabName = "ruralstore_dashboard",
+        fluidPage(
+          box(
+            title = "Distribution of Grocery Stores by Type (Iowa)", 
+            width = 12,
+            footer = "Source: SalesGenie Business Data, Accessed August 2020",
+            status = "warning",
+            
+            plotlyOutput(outputId = "plot_five")
+          ),
+          box(
+            title = "Sales Volume Distribution for Non-Chain Grocery Stores (Iowa)", 
+            width = 12,
+            footer = "Source: SalesGenie Business Data, Accessed August 2020",
+            status = "warning",
+            
+            plotlyOutput(outputId = "plot_six"))
+        )
       )
     )
   )
@@ -358,6 +457,8 @@ server <- function(input, output) {
   # Loading Datasets required for automating CPI and State Index values.
   df_state_index <<- read.csv("loadData/State_Index_SubSet.csv")
   df_cpi <<- read.csv("loadData/CPI_Subset.csv")
+  df_storeType <<- read.csv("../SalesGenie/SalesTypeDistribution.csv")
+  df_salesVolume <<- read.csv("../SalesGenie/SalesVolumeDistribution.csv")
   
   cpi <<- df_cpi$Apr[9] - df_cpi$HALF2[8]
 
@@ -512,6 +613,19 @@ server <- function(input, output) {
       }
     })
     
+    output$month_box <- renderUI({
+      
+      if (input$scenario_button == "scenario_two") {
+        numericInput(inputId = "month_rent", 
+                     label = "Monthly Rent", 
+                     value = 2500, step = 100)
+      } 
+      
+      else if (input$scenario_button == "scenario_one") {
+        NULL
+      }
+      
+    })
     
     # Define reactive depreciation values to call based on selected scenario options.
     Depr_1 <- reactive({
@@ -594,16 +708,16 @@ server <- function(input, output) {
                                        Interest_Rate = input$int_rate / 100)
       
       Cost_Goods_Sold <- Cost_of_Goods_Sold(Total_Estimated_Revenue = EstRevenueReactive(),
-                                            Gross_Margin_Percentage = input$gross_margin_pct)
+                                            Gross_Margin_Percentage = input$gross_margin_pct/100)
       
       Employee_Wages <- Employee_Wages(Total_Estimated_Revenue = EstRevenueReactive(), 
-                                       Percentage = input$employee_pct)
+                                       Percentage = input$employee_pct/100)
       
       Officer_Compensation <- Officer_Compensation(Total_Estimated_Revenue = EstRevenueReactive(), 
-                                                   Percentage = input$officer_pct)
+                                                   Percentage = input$officer_pct/100)
       
       Other_Op_Exp <- Other_Operating_Expense(Total_Estimated_Revenue = EstRevenueReactive(),
-                                              Percentage = input$other_exp_pct)
+                                              Percentage = input$other_exp_pct/100)
       
       Annual_Rent <- Annual_Rent(Monthly_Rent = input$month_rent)
       
@@ -613,7 +727,6 @@ server <- function(input, output) {
           Officer_Compensation + 
           Other_Op_Exp + 
           Interest_Exp + 
-          Annual_Rent + 
           Depr_1()
       }
       else if (input$scenario_button == "scenario_two") {
@@ -927,7 +1040,82 @@ server <- function(input, output) {
   output$plot_four <- renderTable({
     plot_four()
   })
+  
+  ## Define Reactive Plot Five
+  plot_five <- reactive({
+
+    req(df_storeType)
     
+    ds_ncg_cg<-  ggplot(df_storeType, aes(x =GrpCode, y = Count, fill =StoreType)) +
+      geom_bar(position="dodge", stat="identity")+
+      #Rename to describe access
+      scale_x_discrete(labels=c("PG1" = ">=10,000 Core county of a MSA",
+                                "PG2" = ">=10,000 Non-core MSA county",
+                                "PG3" = "2,500 to 9,999 Non-metro county",
+                                "PG4"="2,500 to 9,999 Metro county",
+                                "PG5A"="500 to 2,499
+Non-metro 
+adjacent 
+to a MSA",
+                                "PG5N"="500 to 2,499
+Non-metro
+not adjacent 
+to a MSA",
+                                "PG6"="500 to 2,499 
+Metro county",
+                                "PG7"="250 to 499",
+                                "Rest_of_the_State"="249 or fewer"))+
+      scale_fill_okabe_ito() +
+      theme(axis.text.x = element_text(hjust = 0.5),
+            plot.title = element_text(vjust = 3,hjust = 0.5))+
+      ylab("Number Of Stores")+
+      xlab("")
+    
+    ggplotly(ds_ncg_cg) %>% layout(title = list(text = "Number of Grocery Store Type in Cities in Iowa (under 2,500 population) by Population Group", y = 0.98),font = list(size = 10))
+    
+    })
+  
+  # Render Reactive Plot Five
+  output$plot_five <- renderPlotly({
+    plot_five()
+  })
+  
+  # Define Reactive Plot Six
+  plot_six <- reactive({
+    
+    req(df_salesVolume)
+    df_salesVolume$GrpCode <- factor(df_salesVolume$GrpCode, 
+                                     levels = c("499 and fewer", 
+                                                "500 to 2,499 non-metro county", 
+                                                "500 to 2,499 in metro county"))
+    
+    ncg_sales_plot<- ggplot(df_salesVolume, aes(x =factor(Location_Sales_Volume_Range, 
+                                                          level=c('Less Than $500,000',
+                                                                  '$500,000-1 Million',
+                                                                  '$1-2.5 Million',
+                                                                  '$2.5-5 Million',
+                                                                  '$5-10 Million',
+                                                                  '$10-20 Million',
+                                                                  '$20-50 Million',
+                                                                  '$50-100 Million',
+                                                                  '$100-500 Million')), 
+                                                y = Count, fill = GrpCode)) +
+      geom_bar(stat = "identity", position = "stack") +
+      coord_flip()+
+      xlab("") +
+      ylab("Number of Stores") +
+      scale_fill_okabe_ito(name="")+
+      theme(axis.text.x = element_text(hjust = 1))
+    ggplotly(ncg_sales_plot) %>% layout(title = list(text = "Number of Non-Chain Grocery Stores by Sales Volume Range for Cities in Iowa (under 2,500 Population)", 
+                                                     y = 0.98),font = list(size = 10))
+  })
+  
+  ## Render Reactive Plot Six
+  output$plot_six <- renderPlotly({
+    plot_six()
+  })
+
+  
 }
 
 # Run the application 
