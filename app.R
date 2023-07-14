@@ -362,6 +362,7 @@ server <- function(input, output) {
   df_cpi <<- read.csv("loadData/CPI_Subset.csv")
   df_storeType <<- read.csv("../SalesGenie/SalesTypeDistribution.csv")
   df_salesVolume <<- read.csv("../SalesGenie/SalesVolumeDistribution.csv")
+
   
   cpi <<- df_cpi$Apr[9] - df_cpi$HALF2[8]
 
@@ -530,12 +531,15 @@ server <- function(input, output) {
       
     })
     
+    DistList <- eventReactive(input$map_data_button, {DistancesList})
+    
     # Define Reactive Calculation for Total Estimated Revenue
     EstRevenueReactive <- reactive({
       
-      Total_Estimate_Revenue(metro_pop = DistancesList$metro_population, 
-                             town_pop = DistancesList$city_population, 
-                             rural_pop = DistancesList$rural_population, 
+      req(DistList())
+      Total_Estimate_Revenue(metro_pop = DistList()$metro_population, 
+                             town_pop = DistList()$city_population, 
+                             rural_pop = DistList()$rural_population, 
                              state_index = state_index, 
                              est_per_price_increase = cpi)
       
@@ -544,8 +548,6 @@ server <- function(input, output) {
     
     # Define reactive depreciation values to call based on selected scenario options.
     Depr_1 <- reactive({
-      
-      req(input$remodel)
       
       Depreciation_1(Building_Remodeling = input$remodel,
                      Parking_Lot_Improvements = input$parklot,
@@ -565,8 +567,6 @@ server <- function(input, output) {
     })
     
     Depr_2 <- reactive({
-      
-      req(input$leasehold)
       
       Depreciation_2(Leasehold_Improvements = input$leasehold, 
                      Leasehold_Improvements_Use_Life = input$leasehold_life,
