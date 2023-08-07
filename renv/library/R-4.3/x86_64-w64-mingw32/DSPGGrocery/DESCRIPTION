@@ -1,0 +1,29 @@
+Package: DSPGGrocery
+Type: Package
+Title: Decision Making for Rural Grocery Stores
+Version: 0.1.0
+Author: Harun Celik, Srika Raja, Aaron Null, Alex Cory
+Maintainer: Harun Celik <hceliK@iastate.edu>
+Description: The functions in this package are used to calculate the values in the DSPGrocery Shiny application. The package aims to provide users with automated information on market area sizes, estimated expenses, and revenues to aid decision making for grocery store start-ups in rural setttings.
+License: Apache License (>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+Imports: tigris, sf, tidycensus, dplyr, magrittr, oce (>= 1.8.1), cli,
+    googleway, geosphere, ggmap, stringr, tidyr
+Built: R 4.3.0; ; 2023-08-03 12:57:21 UTC; windows
+RemoteType: github
+RemoteHost: api.github.com
+RemoteUsername: DSPG-2023
+RemoteRepo: Grocery
+RemoteRef: main
+RemoteSha: 479e4bcb6d28b3c4c4fa23ac5ccd2febfa4358c6
+GithubHost: api.github.com
+GithubRepo: Grocery
+GithubUsername: DSPG-2023
+GithubRef: main
+GithubSHA1: 479e4bcb6d28b3c4c4fa23ac5ccd2febfa4358c6
+Remotes: github::dankelley/oce

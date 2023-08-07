@@ -1,0 +1,15 @@
+,Location_Sales_Volume_Range,GrpCode,Count
+1,$1-2.5 Million,499 and fewer,8
+2,$1-2.5 Million,"500 to 2,499 in metro county",11
+3,$1-2.5 Million,"500 to 2,499 non-metro county",39
+4,$2.5-5 Million,499 and fewer,2
+5,$2.5-5 Million,"500 to 2,499 in metro county",18
+6,$2.5-5 Million,"500 to 2,499 non-metro county",26
+7,$5-10 Million,"500 to 2,499 in metro county",3
+8,$5-10 Million,"500 to 2,499 non-metro county",5
+9,"$500,000-1 Million",499 and fewer,8
+10,"$500,000-1 Million","500 to 2,499 in metro county",6
+11,"$500,000-1 Million","500 to 2,499 non-metro county",11
+12,"Less Than $500,000",499 and fewer,7
+13,"Less Than $500,000","500 to 2,499 in metro county",4
+14,"Less Than $500,000","500 to 2,499 non-metro county",11

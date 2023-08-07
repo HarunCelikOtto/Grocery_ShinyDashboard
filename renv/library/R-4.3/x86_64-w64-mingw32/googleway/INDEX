@@ -1,0 +1,63 @@
+%>%                     Pipe
+access_result           Access Result
+add_bicycling           Add bicycling
+add_circles             Add circle
+add_dragdrop            Drag Drop Geojson
+add_drawing             Add Drawing
+add_geojson             Add GeoJson
+add_heatmap             Add heatmap
+add_kml                 Add KML
+add_markers             Add markers
+add_overlay             Add Overlay
+add_polygons            Add polygon
+add_polylines           Add polyline
+add_rectangles          Add Rectangles
+add_traffic             Add Traffic
+add_transit             Add transit
+clear_bounds            Clear bounds
+clear_circles           Remove drawing
+clear_keys              Clear Keys
+clear_search            Clear search
+decode_pl               Decode PL
+encode_pl               Encode PL
+geo_melbourne           geo_melbourne
+google_charts           Google Charts
+google_directions       Google Directions
+google_dispatch         Google dispatch
+google_distance         Google Distance
+google_elevation        Google elevation
+google_find_place       Google Find Place
+google_geocode          Google geocoding
+google_keys             Google Keys
+google_map              Google map
+google_map-shiny        Shiny bindings for google_map
+google_map_directions   Google Map Directions
+google_map_panorama     Google Map Panorama
+google_map_search       Google Map Search
+google_map_update       Google map update
+google_map_url          Google Map Url
+google_map_view         google map view
+google_nearestRoads     Nearest Roads
+google_place_autocomplete
+                        Google place autocomplete
+google_place_details    Google place details
+google_places           Google places
+google_reverse_geocode
+                        Google reverse geocoding
+google_snapToRoads      Snap To Roads
+google_speedLimits      Speed Limits
+google_streetview       Google street view
+google_timezone         Google timezone
+map_styles              Map Styles
+melbourne               Melbourne
+place_fields            Place Fields
+set_key                 Set Key
+tram_route              Tram Route
+tram_stops              Tram stops along tram route 35 in Melbourne
+update_circles          Update circles
+update_geojson          update geojson
+update_heatmap          update heatmap
+update_polygons         Update polygons
+update_polylines        Update polylines
+update_rectangles       Update rectangles
+update_style            Update style

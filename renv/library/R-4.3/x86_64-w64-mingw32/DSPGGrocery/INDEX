@@ -1,0 +1,93 @@
+Address_Parser          Parses an Address
+Adj_Capita_Grocery_Spend
+                        Calculates Average Per Capita Spending Adjusted
+                        by Estimated Price Increase
+Annual_Rent             Calculates the Annual Cost of Rent for Grocery
+                        Stores (Scenario 2)
+Auto_Pct                Determining Percentage of County Covered in
+                        Market Area
+Avg_Capita_Grocery_Spending
+                        Calculates Average Grocery Spending Per Capita.
+Calc_Cities_Pop         Calculates the Population of Cities by County
+                        Geography
+Calc_Counties_Pop       Calculates the Population of Counties Given a
+                        Vector of Counties and States
+Calc_Market_Size        Calculates Market Size
+Cities_Pop              Finds the Population of all the Cities in the
+                        Market Area
+City_Populations        Calculation for Population of Cities in Quarter
+                        Circle.
+Cost_of_Goods_Sold      Calculates the Cost of Goods Sold Based on
+                        Gross Margin for Grocery Stores
+County_Identifier       Find County from Long/Lat points and state
+Create_Circle_Buffer    Creates a Circle Buffer to the Furthest of Four
+                        Nearest Stores in a Quadrant
+Depreciation_1          Calculates the Cost of Depreciation Based on
+                        List of Assets (For a Building Owner)
+Depreciation_2          Calculates the Cost of Depreciation Based on
+                        List of Assets (For a Renter)
+Distance_Euclidean      Calculates Euclidean Distance from an Origin
+                        point to End Points
+Employee_Wages          Calculates the Estimated Cost of Employee Wages
+                        for Grocery Stores
+Get_Census_Vars_ACS     Retrieves Relevant Census Variables from
+                        American Community Survey (2021)
+Get_Census_Vars_Decennial
+                        Retrieves Relevant Census Variables from the US
+                        Decennial Census (2020)
+Get_Cities_in_County    Find all Cities in a County Given State and
+                        County
+Gross_Margin            Calculates the Expected Gross Margin for
+                        Grocery Stores
+Haversine_Calculator    Find Distance using Haversine Formula
+Interest_Expense        Calculates the Annual Cost of Interest on a
+                        Loan
+Interest_Income         Calculates the Estimated Income from
+                        Interest-Bearing Assets for Grocery Stores
+Metro_Pop               Finds the Population of the City the Store is
+                        in.
+Officer_Compensation    Calculates the Estimated Cost of Officer
+                        Compensation for Grocery Stores
+Operating_Income_Loss   Calculation of Revenue Surplus after the
+                        Subtraction of Cost of Goods and other
+                        Operating Costs (Interim Result - Not Final)
+Other_Income            Calculates the Estimated Income from
+                        Miscellaneous Sources for Grocery Stores
+Other_Operating_Expense
+                        Calculates the Estimated Cost of Miscellaneous
+                        Expenses for Grocery Stores
+Pct_County              Calculation for a quarter circle.
+Pop_Binder              Creating a Dataframe from an Address
+Primary_Shopper_Count   Calculates the Number of Primary Shoppers in
+                        Each Market
+Pull_Cities             Takes a Vector of States and Retrieves All
+                        Cities in State(s)
+Pull_Counties           Takes a Vector of States and Retrieves All
+                        Counties in State(s)
+Quadrant_Area           Calculation for a quarter circle.
+Quadrant_Calculator     Determines Distances to Stores in Quadrant
+                        Areas
+Rare_Shopper_Count      Calculates the Number of Rare Shoppers in Each
+                        Marker
+Rural_Pop               Finds the Population of everyone who is in the
+                        Area but not in a Town
+Rural_Population        Calculation for a quarter circle.
+Rural_Shoppers_Count    Calculates Count of Rare Shoppers for a Rural
+                        Market
+Secondary_Shopper_Count
+                        Calculates the Number of Secondary Shoppers in
+                        Each Market
+State_Adj_Capita_Grocery_Spend
+                        Calculates Average per Capita Spending Adjusted
+                        by Estimated Price Increase and State Index
+Total_Estimate_Revenue
+                        Calculates the Estimated Total Revenue
+Total_Spend_Primary_Shoppers
+                        Calculates the Money Spent by Primary Shoppers
+Total_Spend_Rare_Shoppers
+                        Calculates the Money Spent by Rare Shoppers
+Total_Spend_Secondary_Shoppers
+                        Calculates the Money Spent by Secondary
+                        Shoppers
+UTM_Zoner               Finding UTM Zone from Longitude in North
+                        America

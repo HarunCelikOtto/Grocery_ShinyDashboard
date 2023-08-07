@@ -1,0 +1,14 @@
+
+dependencies:
+  - name: map
+    version: 1.0.0
+    src: "htmlwidgets/lib/map"
+    script:
+      - map_events.js
+      - legend.js
+      - map_layers.js
+      - charts.js
+      - geolocation.js
+    stylesheet: map_style.css
+
+

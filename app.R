@@ -360,8 +360,8 @@ server <- function(input, output) {
   # Loading Datasets required for automating CPI and State Index values.
   df_state_index <<- read.csv("loadData/State_Index_SubSet.csv")
   df_cpi <<- read.csv("loadData/CPI_Subset.csv")
-  df_storeType <<- read.csv("../SalesGenie/SalesTypeDistribution.csv")
-  df_salesVolume <<- read.csv("../SalesGenie/SalesVolumeDistribution.csv")
+  df_storeType <<- read.csv("loadData/SalesTypeDistribution.csv")
+  df_salesVolume <<- read.csv("loadData/SalesVolumeDistribution.csv")
 
   
   cpi <<- df_cpi$Apr[9] - df_cpi$HALF2[8]
