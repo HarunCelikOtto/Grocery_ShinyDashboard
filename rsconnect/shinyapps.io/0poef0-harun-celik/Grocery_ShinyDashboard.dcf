@@ -1,12 +1,13 @@
 name: Grocery_ShinyDashboard
 title: Grocery_ShinyDashboard
-username: 0poef0-harun-celik
+username:
 account: 0poef0-harun-celik
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9549723
-bundleId: 7527118
+bundleId: 7540236
 url: https://0poef0-harun-celik.shinyapps.io/Grocery_ShinyDashboard/
-version: 1
+when: 1691425156.22078
+lastSyncTime: 1691425156.22079
 asMultiple: FALSE
 asStatic: FALSE

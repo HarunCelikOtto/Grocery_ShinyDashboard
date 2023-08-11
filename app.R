@@ -25,6 +25,7 @@ library(scales)
 library(tidyr)
 library(ggokabeito)
 library(forcats)
+library(usethis)
 
 
 # Define UI for application that draws a histogram
