@@ -103,8 +103,8 @@ ui <- dashboardPage(
               textInput(
                 inputId = "address",
                 label = "Enter Store Address",
-                placeholder = "St, Lamoni, IA",
-                value = "St, Lamoni, IA"
+                placeholder = "W Main St, Lamoni, IA",
+                value = "W Main St, Lamoni, IA"
               ),
               textInput(
                 inputId = "keyword",
@@ -356,7 +356,7 @@ ui <- dashboardPage(
 
 ################################ SERVER SIDE ###################################
 
-server <- function(input, output) {
+server <- function(session, input, output) {
   
   # Loading Datasets required for automating CPI and State Index values.
   df_state_index <<- read.csv("loadData/State_Index_SubSet.csv")
@@ -380,22 +380,25 @@ server <- function(input, output) {
   
   # Trigger Circle Buffer Calculations after hitting the 'calculate location' Button
   observeEvent(input$calc_data_button, {
-    
-    
-    withProgress(message = "Pulling Geographic Information", 
-                 value = 0, 
-                 max = 30, 
+
+
+    withProgress(message = "Pulling Geographic Information",
+                 value = 0,
+                 max = 30,
                  detail = "Calculating Stores, Cities, and Counties", {
-                   
+
                    incProgress(amount = 10, message = "Loading Geographies")
                    Sys.sleep(2)
                    incProgress(amoun = 10, message = "Please Wait... Pulling Store Information ")
-                   
-                   StoreInfo <<- Create_Circle_Buffer(address = input$address,
-                                                      keyword = input$keyword,
-                                                      api_key = Sys.getenv("PLACES_KEY"))
-                   
+
+                   Data$StoreInfo <- Create_Circle_Buffer(address = input$address,
+                                                     keyword = input$keyword,
+                                                     api_key = Sys.getenv("PLACES_KEY"))
+
                    incProgress(amount = 10, "Process Complete")
+                   
+                   print(Data$StoreInfo)
+
                    }
                  )
     })
